@@ -11,7 +11,7 @@ library(ggplot2)
 library(ggforce)
 
 
-source('../neighborhood_and_index_set_selection_utils.R')
+source('utils/voroni_knn.R')
 
 options(dplyr.summarise.inform = FALSE)
 seed1 = 1009807543
@@ -23,8 +23,8 @@ t_partition = 30
 estimator = 'rotated_2SLS'
 nvec_col_names = c('raw_nvec1','raw_nvec2')
 
-est_set = fread(paste0('../output/simulation_1/',seed1,'/LORD3_inputs.csv'))
-LORD3_results = fread(paste0('../output/simulation_1/',seed1,'/LORD3_results.csv'))
+est_set = fread(paste0('output/simulation_1/',seed1,'/LORD3_inputs.csv'))
+LORD3_results = fread(paste0('output/simulation_1/',seed1,'/LORD3_results.csv'))
 
 df = cbind(est_set,LORD3_results)
 df = df[order(-LLR)]
@@ -32,10 +32,10 @@ df = df[order(-LLR)]
 L_x = as.matrix(df[1:M_prime,.(X1,X2)])
 L_v = as.matrix(df[1:M_prime,nvec_col_names,with=F])
 
-dir.create('../output/simulation_1/summary_figures/voroni_evolution/', showWarnings = FALSE)
+dir.create('output/simulation_1/summary_figures/voroni_evolution/', showWarnings = FALSE)
 voroni_assets = get_voroni_knn_discontinuities_index_sets_and_estimates(
 	L_x, L_v, df, k_prime, t_partition, estimator,
-	save_plots='../output/simulation_1/summary_figures/voroni_evolution/',
+	save_plots='output/simulation_1/summary_figures/voroni_evolution/',
 	R2_figure=T
 )
 
@@ -51,7 +51,7 @@ p2 = voroni_plot + geom_point(data=voroni_assets$top_M_prime_TEs,aes(x=X1,y=X2),
 			coord_equal() + ggtitle('Step 2: Alg. 1 output with index sets') + xlim(c(0,1)) + ylim(c(0,1))
 
 m = grid.arrange(p1,p2,widths=c(4,4),heights=c(4))
-ggsave('../output/simulation_1/summary_figures/grid_step1_step2.png',m,width=10,height=5)
+ggsave('output/simulation_1/summary_figures/grid_step1_step2.png',m,width=10,height=5)
 
 
 # New figure per Daniels suggestions
@@ -92,11 +92,11 @@ for (i in 1:size_U){
 }
 
 m = grid.arrange(p1a, p2a,widths=c(4,4),heights=c(4))
-ggsave('../output/simulation_1/summary_figures/side_by_side_spread_and_overlap.png',m,width=10,height=5)
+ggsave('output/simulation_1/summary_figures/side_by_side_spread_and_overlap.png',m,width=10,height=5)
 
 
 m = grid.arrange(p1, p2a,widths=c(4,4),heights=c(4))
-ggsave('../output/simulation_1/summary_figures/L_to_reduced_L_with_overlap.png',m,width=10,height=5)
+ggsave('output/simulation_1/summary_figures/L_to_reduced_L_with_overlap.png',m,width=10,height=5)
 
 # New version with all three side by side
 
@@ -105,10 +105,10 @@ p2a = p2a + ggtitle(paste0('Limit to top M=',new_M_prime,' discontinuities'))
 p2 = p2 + ggtitle(paste0('Step 2: VKNN returns ',new_M_prime,' discontinuities')) 
 
 m = grid.arrange(p1, widths=c(4),heights=c(4))
-ggsave('../output/simulation_1/summary_figures/just_left_1.png',m,width=4,height=4)
+ggsave('output/simulation_1/summary_figures/just_left_1.png',m,width=4,height=4)
 
 m = grid.arrange(p1, p2a, widths=c(4,4),heights=c(4))
-ggsave('../output/simulation_1/summary_figures/just_left_2.png',m,width=8,height=4)
+ggsave('output/simulation_1/summary_figures/just_left_2.png',m,width=8,height=4)
 
 m = grid.arrange(p1, p2a, p2, widths=c(4,4,4),heights=c(4))
-ggsave('../output/simulation_1/summary_figures/all_3_versions.png',m,width=12,height=4)
+ggsave('output/simulation_1/summary_figures/all_3_versions.png',m,width=12,height=4)

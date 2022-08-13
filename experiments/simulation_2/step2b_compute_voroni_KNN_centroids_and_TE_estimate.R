@@ -8,7 +8,7 @@ library(AER)
 library(pracma)
 
 options(dplyr.summarise.inform = FALSE)
-source('../neighborhood_and_index_set_selection_utils.R')
+source('utils/voroni_knn.R')
 
 M_prime = 400
 k_prime = 400
@@ -30,7 +30,7 @@ seed1 = as.integer(args[1])
 CATE_ls = args[2]
 bias_ls = args[3]
 
-OUTDIR = paste0('../output/simulation_2/',seed1,'/',CATE_ls,'/',bias_ls,'/')
+OUTDIR = paste0('output/simulation_2/',seed1,'/',CATE_ls,'/',bias_ls,'/')
 
 est_set = fread(paste0(OUTDIR,'LORD3_inputs.csv'))
 LORD3_results = fread(paste0(OUTDIR,'LORD3_results.csv'))

@@ -9,7 +9,7 @@ seed1 = as.integer(args[1])
 CATE_ls = args[2]
 bias_ls = args[3]
 
-OUTDIR = paste0('../output/simulation_2/',seed1,'/',CATE_ls,'/',bias_ls)
+OUTDIR = paste0('output/simulation_2/',seed1,'/',CATE_ls,'/',bias_ls)
 
 M = 400
 

@@ -11,7 +11,7 @@ args = parser.parse_args()
 np.random.seed(args.seed1)
 torch.manual_seed(args.seed1)
 
-N = 20000
+N = 5000
 p = 2
 
 # Need to init with X, Y, but will just sample in prior mode
@@ -43,4 +43,4 @@ df['G'] = G
 df['Z1'] = Z1
 df['Z2'] = Z2
 
-df.to_csv(f'../output/simulation_1/{args.seed1}/LORD3_inputs.csv',index=False)
+df.to_csv(f'output/simulation_1/{args.seed1}/LORD3_inputs.csv',index=False)

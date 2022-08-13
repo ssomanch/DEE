@@ -3,8 +3,7 @@ import numpy as np
 import torch
 import os
 import sys
-sys.path.append('../../GPCorrection/')
-from src.TwoStageGPJustRBF import TwoStageGPJustRBFWrapper
+from DEE_GP.TwoStageGPJustRBF import TwoStageGPJustRBFWrapper
 
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import ParameterGrid
@@ -22,7 +21,7 @@ args = parser.parse_args()
 
 unfiltered = args.unfiltered
 
-OUTDIR  = f'../output/simulation_2/{args.seed1}/{args.CATE_ls}/{args.bias_ls}/'
+OUTDIR  = f'output/simulation_2/{args.seed1}/{args.CATE_ls}/{args.bias_ls}/'
 
 ###############################################
 # Utilities                                   #

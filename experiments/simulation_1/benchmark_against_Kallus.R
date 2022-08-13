@@ -16,7 +16,7 @@ M = 400
 ######################################################
 
 
-data = fread(paste0('../output/simulation_1/',
+data = fread(paste0('output/simulation_1/',
                     seed1,'/',CATE_ls,'/',bias_ls,'/LORD3_inputs_and_CATE_bias_Y.csv'))
 
 first_N_rows = as.integer(nrow(data)/2)
@@ -30,7 +30,7 @@ obs_set = data[1:first_N_rows,]
 # discontinuity (e.g. treatment isn't actually randomized at the
 # RD -- since their is still selection into treatment at the RD --
 # just not on the basis of the TE).
-llrs = fread(paste0('../output/simulation_1/',
+llrs = fread(paste0('output/simulation_1/',
                     seed1,'/LORD3_results.csv'))
 top_M = order(-llrs$LLR)[1:M]
 
@@ -44,7 +44,7 @@ local_RD_est_set = data[local_RD_est_set,]
 
 # Load the test points
 test_data = fread('../../GPCorrection/output/test_data_for_R.csv')
-true_cates = fread(paste0('../output/simulation_1/',
+true_cates = fread(paste0('output/simulation_1/',
                           seed1,'/',CATE_ls,'/',bias_ls,'/','true_test_CATE_and_bias.csv'))
 
 
@@ -109,5 +109,5 @@ tau_full = callus_pred + omega_full
 MSE = mean((tau_full - true_cates$CATE)**2)
 print(paste('    MSE:',MSE))
 to_write = data.frame('Variable'='MSE','Value'=MSE)
-fwrite(to_write,paste0('../output/simulation_1/',
+fwrite(to_write,paste0('output/simulation_1/',
                        seed1,'/',CATE_ls,'/',bias_ls,'/kallus_benchmark_description.csv'))

@@ -4,8 +4,8 @@ import torch
 import argparse
 import sys
 import scipy
-sys.path.append('../../GPCorrection/')
-from src.TwoStageGPJustRBF import TwoStageGPJustRBFWrapper
+from DEE_GP.TwoStageGPJustRBF import TwoStageGPJustRBFWrapper
+from DEE_GP.PLP_BMA_utils import *
 from sklearn.metrics import pairwise_distances,mean_squared_error
 
 #########################################
@@ -26,7 +26,7 @@ unfiltered = args.unfiltered
 # Set up the experiment                 #
 #########################################
 
-OUTDIR = f'../output/simulation_1/{args.seed1}/{args.CATE_ls}/{args.bias_ls}/'
+OUTDIR = f'output/simulation_1/{args.seed1}/{args.CATE_ls}/{args.bias_ls}/'
 
 if unfiltered:
     # Load the estimates at all points in L

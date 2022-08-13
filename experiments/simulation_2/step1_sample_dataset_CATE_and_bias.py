@@ -20,12 +20,12 @@ args = parser.parse_args()
 # Generate problem instance                                   #
 ###############################################################
 
-OUTDIR = f'../output/simulation_2/{args.seed1}/{args.CATE_ls}/{args.bias_ls}/'
+OUTDIR = f'output/simulation_2/{args.seed1}/{args.CATE_ls}/{args.bias_ls}/'
 
 np.random.seed(args.seed1)
 torch.manual_seed(args.seed1)
 
-N = 20000
+N = 5000
 p = 2
 max_abs_rho = 0.9
 

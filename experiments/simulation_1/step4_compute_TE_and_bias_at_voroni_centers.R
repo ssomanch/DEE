@@ -9,7 +9,7 @@ library(AER)
 library(pracma)
 
 options(dplyr.summarise.inform = FALSE)
-source('../neighborhood_and_index_set_selection_utils.R')
+source('utils/voroni_knn.R')
 
 degree = 4
 k = 200
@@ -28,12 +28,12 @@ bias_ls = args[3]
 # Load data
 ##########################################################
 
-OUTDIR = paste0('../output/simulation_1/',seed1,'/',CATE_ls,'/',bias_ls,'/')
+OUTDIR = paste0('output/simulation_1/',seed1,'/',CATE_ls,'/',bias_ls,'/')
 
 # The dataset is a function of the CATE and bias LS...
 est_set = fread(paste0(OUTDIR,'LORD3_inputs_and_CATE_bias_Y.csv'))
 # ... but the LORD3 LLR is just a function of seed1
-LORD3_results = fread(paste0('../output/simulation_1/',
+LORD3_results = fread(paste0('output/simulation_1/',
 							 seed1,'/LORD3_results.csv'))
 
 df = cbind(est_set,LORD3_results)

@@ -11,7 +11,7 @@ ix_cols = c('seed1','CATE_ls','bias_ls','fname')
 valid_LSs = c('0.2','0.5')
 y_upper = c(.9,0.9,0.65,0.5)
 
-OUTDIR = paste0('../output/',EXPERIMENT,'/summary_figures/')
+OUTDIR = paste0('output/',EXPERIMENT,'/summary_figures/')
 dir.create(OUTDIR, showWarnings = FALSE)
 
 ################################################################
@@ -134,9 +134,9 @@ get_PLP_search_results = function(filtered){
 	# Load the weighted results, for either the filtered or the unfilterd
 	# runs. Adds a column labeled 'Filtered'
 	if (filtered){
-		all_outputs = list.files(paste0('../output/',EXPERIMENT),'PLP_strategy_search.csv',recursive = T)
+		all_outputs = list.files(paste0('output/',EXPERIMENT),'PLP_strategy_search.csv',recursive = T)
 	} else {
-		all_outputs = list.files(paste0('../output/',EXPERIMENT),'PLP_strategy_search_unfiltered.csv',recursive = T)
+		all_outputs = list.files(paste0('output/',EXPERIMENT),'PLP_strategy_search_unfiltered.csv',recursive = T)
 	}
 		
 	PLP_search = rbindlist(lapply(str_split(all_outputs,'/'),function(x) as.data.frame(t(x))))
@@ -145,7 +145,7 @@ get_PLP_search_results = function(filtered){
 	
 	all_descrs = list()
 	for (i in 1:nrow(PLP_search)){
-		descr = t(read.csv(paste0('../output/',EXPERIMENT,'/',PLP_search[i,path]),row.names = 1))
+		descr = t(read.csv(paste0('output/',EXPERIMENT,'/',PLP_search[i,path]),row.names = 1))
 		df = as.data.frame(descr)
 		cols = colnames(df)
 		df$strategy = rownames(df)
@@ -162,9 +162,9 @@ get_PLP_search_results = function(filtered){
 get_original_results = function(filtered){
 	## Original results (unmixed baselines)
 	if (filtered){
-		all_outputs = list.files(paste0('../output/',EXPERIMENT),'*_description.csv',recursive = T)
+		all_outputs = list.files(paste0('output/',EXPERIMENT),'*_description.csv',recursive = T)
 	} else {
-		all_outputs = list.files(paste0('../output/',EXPERIMENT),'*_description_unfiltered.csv',recursive = T)
+		all_outputs = list.files(paste0('output/',EXPERIMENT),'*_description_unfiltered.csv',recursive = T)
 	}
 	
 	seeds_configs_and_paths = rbindlist(lapply(str_split(all_outputs,'/'),function(x) as.data.frame(t(x))))
@@ -173,7 +173,7 @@ get_original_results = function(filtered){
 	
 	all_descrs = list()
 	for (i in 1:nrow(seeds_configs_and_paths)){
-		descr = t(read.csv(paste0('../output/',EXPERIMENT,'/',seeds_configs_and_paths[i,path]),row.names = 1))
+		descr = t(read.csv(paste0('output/',EXPERIMENT,'/',seeds_configs_and_paths[i,path]),row.names = 1))
 		all_descrs[[i]] = as.data.frame(descr)
 	}
 	all_descrs = rbindlist(all_descrs,fill=T)

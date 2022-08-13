@@ -27,13 +27,13 @@ parser.add_argument('--bias-ls', help='Lengthscale for bias GP prior',type=float
 
 args = parser.parse_args()
 
-OUTDIR = f'../output/simulation_1/{args.seed1}/{args.CATE_ls}/{args.bias_ls}/'
+OUTDIR = f'output/simulation_1/{args.seed1}/{args.CATE_ls}/{args.bias_ls}/'
 
 np.random.seed(args.seed1)
 torch.manual_seed(args.seed1)
 
 # Load dataframe with training inputs
-df = pd.read_csv(f'../output/simulation_1/{args.seed1}/LORD3_inputs.csv')
+df = pd.read_csv(f'output/simulation_1/{args.seed1}/LORD3_inputs.csv')
 N = df.shape[0]
 Y = torch.from_numpy(df.Y.values)        # Random Y draw, to init GP priors
 X = torch.from_numpy(df[['X1','X2']].values)
@@ -48,7 +48,7 @@ test_x = np.concatenate([test_x1.flatten().reshape(1,-1).T,
 test_x = torch.from_numpy(test_x)
 
 # Load the LORD3 repaired neighborhood centers
-U = pd.read_csv(f'../output/simulation_1/{args.seed1}/voroni_KNN_centers__ignore_TE_estimates.csv')
+U = pd.read_csv(f'output/simulation_1/{args.seed1}/voroni_KNN_centers__ignore_TE_estimates.csv')
 U_x = torch.from_numpy(U[['X1','X2']].values)
 
 # Stack the training instances, test grid, and Voroni centers

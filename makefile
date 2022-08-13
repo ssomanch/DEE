@@ -6,13 +6,13 @@ install_LORD3:
 	R CMD install LORD3_0.1.0.tar.gz
 	
 # Step 2: Run simulation 1
-simulation_1:
+simulation_1: install_LORD3
 	Rscript experiments/simulation_1/run_all_replications.R
 	Rscript experiments/simulation_1/analyze_all_replications.R
-	
 		
 # Step 3: Run simulation 2
-simulation_2:
+simulation_2: install_LORD3
 	Rscript experiments/simulation_2/run_all_replications.R
 	Rscript experiments/simulation_2/analyze_all_replications.R
 
+all: simulation_1 simulation_2

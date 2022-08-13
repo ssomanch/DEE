@@ -19,7 +19,7 @@ bias_ls = args[3]
 # Load data
 ##########################################################
 
-OUTDIR = paste0('../output/simulation_2/',seed1,'/',CATE_ls,'/',bias_ls,'/')
+OUTDIR = paste0('output/simulation_2/',seed1,'/',CATE_ls,'/',bias_ls,'/')
 
 est_set = fread(paste0(OUTDIR,'/LORD3_inputs.csv'))
 LORD3_results = fread(paste0(OUTDIR,'/LORD3_results.csv'))

@@ -16,7 +16,7 @@ parser.add_argument('--bias-ls', help='Lengthscale for bias GP prior',type=float
 
 args = parser.parse_args()
 
-OUTDIR = f'../output/simulation_2/{args.seed1}/{args.CATE_ls}/{args.bias_ls}/'
+OUTDIR = f'output/simulation_2/{args.seed1}/{args.CATE_ls}/{args.bias_ls}/'
 
 np.random.seed(args.seed1)
 torch.manual_seed(args.seed1)
