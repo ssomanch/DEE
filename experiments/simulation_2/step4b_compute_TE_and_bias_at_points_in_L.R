@@ -1,13 +1,13 @@
 
 library(data.table)
 library(FNN)
-library(IVcorrectr)
+library(LORD3)
 library(AER)
 
 degree = 4
 k = 200
 M_prime = 400
-estimator = 'rotated_2SLS'
+estimator = 'nonparametric_estimator'
 nvec_col_names = c('raw_nvec1','raw_nvec2')
 
 args = commandArgs(trailingOnly = TRUE)
@@ -62,7 +62,7 @@ get_top_M_CATE_ests = function(df,knn_assignments,M_prime,estimator){
 # Load data
 ##########################################################
 
-OUTDIR = paste0('../output/simulation_1/',seed1,'/',CATE_ls,'/',bias_ls,'/')
+OUTDIR = paste0('../output/simulation_2/',seed1,'/',CATE_ls,'/',bias_ls,'/')
 
 # The dataset is a function of the CATE and bias LS...
 df = fread(paste0(OUTDIR,'obs_estimates_at_all_original_instances.csv'))

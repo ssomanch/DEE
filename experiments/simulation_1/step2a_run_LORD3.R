@@ -1,6 +1,6 @@
 library(data.table)
 library(FNN)
-library(IVcorrectr)
+library(LORD3)
 library(dplyr)
 library(tidyr)
 library(Matrix)
@@ -12,24 +12,6 @@ options(dplyr.summarise.inform = FALSE)
 degree = 4
 k = 200
 nvec_col_names = c('raw_nvec1','raw_nvec2')
-
-##########################################################
-# Utilities
-##########################################################
-
-run_LORD3_and_cbind_useful_output = function(X,Y,D,degree,k,nvec_col_names){
-	
-	# Run LORD3
-	lord3_results = LORD3_binary(X,Y,D,degree,k)
-
-	# Extract likelihood ratio, rename normal vector columns, bind into data.table
-	LLR = lord3_results$LRR
-	normal_vectors = lord3_results$normal_vectors
-	colnames(normal_vectors) = nvec_col_names
-	all_results = as.data.frame(cbind(LLR,normal_vectors))
-	setDT(all_results)
-	return(all_results)
-}
 
 ################################################################
 # Run LORD3 and Voroni KNN repair alg.

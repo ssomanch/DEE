@@ -1,0 +1,19 @@
+Package: LORD3
+Type: Package
+Title: LORD3 RD Discovery and TE Estimation
+Version: 0.1.0
+Author: Ben Jakubowski
+Maintainer: Ben Jakubowski <buj201@nyu.edu>
+Description: Tools to (i) run LORD3, and (ii) use the
+    discovered RDs to estimate treatment effects.
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+Imports:
+    FNN,
+    AER,
+    lmtest,
+    mvtnorm,
+    data.table,
+    pracma,
+    foreach
