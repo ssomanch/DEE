@@ -1,5 +1,5 @@
 # Directories
-seed1_root=../output/simulation_1/$(seed1)
+seed1_root=output/simulation_1/$(seed1)
 all_params_root=$(seed1_root)/$(CATE_ls)/$(bias_ls)
 
 step1_output=$(seed1_root)/LORD3_inputs.csv
@@ -24,56 +24,56 @@ kallus_benchmark_description=$(all_params_root)/kallus_benchmark_description.csv
 .DEFAULT_GOAL=all
 
 # Step 1: Sample X, G, and D
-$(step1_output): src/step1_get_X_and_D_for_LORD3.py
+$(step1_output): experiments/simulation_1/step1_get_X_and_D_for_LORD3.py
 	mkdir -p $(@D)
-	python src/step1_get_X_and_D_for_LORD3.py --seed1=$(seed1)
+	python experiments/simulation_1/step1_get_X_and_D_for_LORD3.py --seed1=$(seed1)
 
 # Step 2a: Apply LORD3
-$(step2a_output): src/step2a_run_LORD3.R $(step1_output)
+$(step2a_output): experiments/simulation_1/step2a_run_LORD3.R $(step1_output)
 	mkdir -p $(@D)
-	/usr/local/bin/Rscript src/step2a_run_LORD3.R $(seed1)
+	Rscript experiments/simulation_1/step2a_run_LORD3.R $(seed1)
 
 # Step 2b: Apply Alg. 1: Voroni KNN 
-$(step2b_output): src/step2b_compute_voroni_KNN_centroids.R $(step2a_output)
+$(step2b_output): experiments/simulation_1/step2b_compute_voroni_KNN_centroids.R $(step2a_output)
 	mkdir -p $(@D)
-	/usr/local/bin/Rscript src/step2b_compute_voroni_KNN_centroids.R $(seed1)
+	Rscript experiments/simulation_1/step2b_compute_voroni_KNN_centroids.R $(seed1)
 
 # Step 3: Sample Y for training points + test grid + Voroni/KNN centers
-$(step3_output): src/step3_sample_CATE_bias_and_Y.py $(step2b_output)
+$(step3_output): experiments/simulation_1/step3_sample_CATE_bias_and_Y.py $(step2b_output)
 	mkdir -p $(@D)
-	python src/step3_sample_CATE_bias_and_Y.py --seed1=$(seed1) --CATE-ls=$(CATE_ls) --bias-ls=$(bias_ls)
+	python experiments/simulation_1/step3_sample_CATE_bias_and_Y.py --seed1=$(seed1) --CATE-ls=$(CATE_ls) --bias-ls=$(bias_ls)
 
 # Step 4: Compute TE along RD, fit observational esitmator (CF) and compute bias
-$(step4_output): src/step4_compute_TE_and_bias_at_voroni_centers.R $(step3_output)
-	/usr/local/bin/Rscript src/step4_compute_TE_and_bias_at_voroni_centers.R $(seed1) $(CATE_ls) $(bias_ls)
+$(step4_output): experiments/simulation_1/step4_compute_TE_and_bias_at_voroni_centers.R $(step3_output)
+	Rscript experiments/simulation_1/step4_compute_TE_and_bias_at_voroni_centers.R $(seed1) $(CATE_ls) $(bias_ls)
 
 # Step 4b: Compute TE at all points in L -- not just Voroni/KNN points in U -- and compute bias
-$(step4b_output): src/step4b_compute_TE_and_bias_at_points_in_L.R $(step4_output)
-	/usr/local/bin/Rscript src/step4b_compute_TE_and_bias_at_points_in_L.R $(seed1) $(CATE_ls) $(bias_ls)
+$(step4b_output): experiments/simulation_1/step4b_compute_TE_and_bias_at_points_in_L.R $(step4_output)
+	Rscript experiments/simulation_1/step4b_compute_TE_and_bias_at_points_in_L.R $(seed1) $(CATE_ls) $(bias_ls)
 
 # Step 5: Compute the final estimators
-$(step5_filtered_output): src/step5_get_final_CATE_estimates.py $(step4_output)
-	python src/step5_get_final_CATE_estimates.py --seed1=$(seed1) --CATE-ls=$(CATE_ls) --bias-ls=$(bias_ls)
+$(step5_filtered_output): experiments/simulation_1/step5_get_final_CATE_estimates.py $(step4_output)
+	python experiments/simulation_1/step5_get_final_CATE_estimates.py --seed1=$(seed1) --CATE-ls=$(CATE_ls) --bias-ls=$(bias_ls)
 
 # Step 6: Compute the final weighted estimators
-$(step6_filtered_output): src/step6_compare_BMA_strategies.py $(step4_output)
-	python src/step6_compare_BMA_strategies.py --seed1=$(seed1) --CATE-ls=$(CATE_ls) --bias-ls=$(bias_ls)
+$(step6_filtered_output): experiments/simulation_1/step6_compare_BMA_strategies.py $(step4_output)
+	python experiments/simulation_1/step6_compare_BMA_strategies.py --seed1=$(seed1) --CATE-ls=$(CATE_ls) --bias-ls=$(bias_ls)
 
 # Step 5: Compute the final estimators for the unfiltered sets
-$(step5_unfiltered_output): src/step5_get_final_CATE_estimates.py $(step4b_output)
-	python src/step5_get_final_CATE_estimates.py --seed1=$(seed1) --CATE-ls=$(CATE_ls) --bias-ls=$(bias_ls) --unfiltered
+$(step5_unfiltered_output): experiments/simulation_1/step5_get_final_CATE_estimates.py $(step4b_output)
+	python experiments/simulation_1/step5_get_final_CATE_estimates.py --seed1=$(seed1) --CATE-ls=$(CATE_ls) --bias-ls=$(bias_ls) --unfiltered
 
 # Step 6: Compute the final weighted estimators for the unfiltered sets
-$(step6_unfiltered_output): src/step6_compare_BMA_strategies.py $(step4b_output)
-	python src/step6_compare_BMA_strategies.py --seed1=$(seed1) --CATE-ls=$(CATE_ls) --bias-ls=$(bias_ls) --unfiltered
+$(step6_unfiltered_output): experiments/simulation_1/step6_compare_BMA_strategies.py $(step4b_output)
+	python experiments/simulation_1/step6_compare_BMA_strategies.py --seed1=$(seed1) --CATE-ls=$(CATE_ls) --bias-ls=$(bias_ls) --unfiltered
 
 # Make the Cattaneo benchmark description
-$(cattaneo_benchmark_description): src/benchmark_against_Cattaneo.R $(step3_output)
-	/usr/local/bin/Rscript src/benchmark_against_Cattaneo.R $(seed1) $(CATE_ls) $(bias_ls)
+$(cattaneo_benchmark_description): experiments/simulation_1/benchmark_against_Cattaneo.R $(step3_output)
+	Rscript experiments/simulation_1/benchmark_against_Cattaneo.R $(seed1) $(CATE_ls) $(bias_ls)
 
 # Make the kallus benchmark description
-$(kallus_benchmark_description): src/benchmark_against_Kallus.R $(step3_output)
-	/usr/local/bin/Rscript src/benchmark_against_Kallus.R $(seed1) $(CATE_ls) $(bias_ls)
+$(kallus_benchmark_description): experiments/simulation_1/benchmark_against_Kallus.R $(step3_output)
+	Rscript experiments/simulation_1/benchmark_against_Kallus.R $(seed1) $(CATE_ls) $(bias_ls)
 
 all: $(step5_filtered_output) $(step6_filtered_output)\
 	 $(step5_unfiltered_output) $(step6_unfiltered_output)\

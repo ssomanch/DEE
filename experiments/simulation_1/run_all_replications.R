@@ -10,7 +10,7 @@ for(seed1 in seed1_set){
     for(bias_ls in bias_ls_grid){
       OUTDIR = paste0('../output/simulation_1/',seed1,'/',CATE_ls,'/',bias_ls,'/')
       dir.create(OUTDIR, showWarnings = FALSE, recursive=TRUE)
-      command = paste0('make -f src/run_one_replication.makefile ',
+      command = paste0('make -f simulation_1/run_one_replication.makefile ',
                         ' seed1=',seed1,
                         ' CATE_ls=',CATE_ls,
                         ' bias_ls=',bias_ls)

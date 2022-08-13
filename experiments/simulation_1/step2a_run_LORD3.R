@@ -1,11 +1,6 @@
 library(data.table)
-library(FNN)
 library(LORD3)
-library(dplyr)
-library(tidyr)
 library(Matrix)
-library(AER)
-library(pracma)
 
 options(dplyr.summarise.inform = FALSE)
 

@@ -9,13 +9,6 @@ from src.TwoStageGPJustRBF import TwoStageGPJustRBFWrapper
 from sklearn.metrics import pairwise_distances,mean_squared_error
 
 #########################################
-# Utility functions for PLP BMA         #
-#########################################
-
-sys.path.append('../')
-from PLP_BMA_utils import *
-
-#########################################
 # Set up the experiment                 #
 #########################################
 
