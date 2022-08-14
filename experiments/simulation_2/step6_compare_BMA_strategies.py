@@ -2,10 +2,12 @@ import pandas as pd
 import numpy as np
 import torch
 import argparse
+import os
 import sys
+sys.path.append(os.getcwd())
 import scipy
-from DEE_GP.TwoStageGPJustRBF import TwoStageGPJustRBFWrapper
-from DEE_GP.PLP_BMA_utils import *
+from DeeGPs.TwoStageGPJustRBF import TwoStageGPJustRBFWrapper
+from DeeGPs.PLP_BMA_utils import *
 from sklearn.metrics import pairwise_distances,mean_squared_error
 
 #########################################

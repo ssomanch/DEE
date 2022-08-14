@@ -192,7 +192,7 @@ bias_ls = args[3]
 OUTDIR = paste0('output/simulation_1/',seed1,'/',CATE_ls,'/',bias_ls,'/')
 
 data = fread(paste0(OUTDIR,'/LORD3_inputs_and_CATE_bias_Y.csv'))
-test_grid = fread('../../GPCorrection/output/test_data_for_R.csv')
+test_grid = fread('output/test_grid.csv')
 true_cates = fread(paste0(OUTDIR,'/','true_test_CATE_and_bias.csv'))
 true_cates = cbind(test_grid,true_cates)
 

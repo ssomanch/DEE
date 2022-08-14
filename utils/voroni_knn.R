@@ -1,6 +1,6 @@
 library(data.table)
 library(FNN)
-library(IVcorrectr)
+library(LORD3)
 library(tidyr)
 library(dplyr)
 library(Matrix)

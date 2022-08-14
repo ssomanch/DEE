@@ -5,7 +5,7 @@ import argparse
 
 from scipy.stats.distributions import norm
 
-from src.data_generator import DataGenerator,get_bias_multiplier
+from data_generator import DataGenerator,get_bias_multiplier
 
 import dill
 

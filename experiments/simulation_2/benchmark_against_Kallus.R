@@ -42,7 +42,7 @@ local_RD_est_set = setdiff(local_RD_est_set,1:first_N_rows)
 local_RD_est_set = data[local_RD_est_set,]
 
 # Load the test points
-test_data = fread('../../GPCorrection/output/test_data_for_R.csv')
+test_data = fread('output/test_grid.csv')
 true_cates = fread(paste0(OUTDIR,'/true_test_CATE_and_bias.csv'))
 
 ######################################################

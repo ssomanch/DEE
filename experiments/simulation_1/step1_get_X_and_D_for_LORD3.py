@@ -11,7 +11,7 @@ args = parser.parse_args()
 np.random.seed(args.seed1)
 torch.manual_seed(args.seed1)
 
-N = 5000
+N = 2000
 p = 2
 
 # Need to init with X, Y, but will just sample in prior mode

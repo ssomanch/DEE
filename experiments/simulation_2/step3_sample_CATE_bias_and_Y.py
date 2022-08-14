@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import argparse
 
-from .data_generator import DataGenerator,get_bias_multiplier
+from data_generator import DataGenerator,get_bias_multiplier
 
 import dill
 

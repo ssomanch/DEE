@@ -3,7 +3,8 @@ import numpy as np
 import torch
 import os
 import sys
-from DEE_GP.TwoStageGPJustRBF import TwoStageGPJustRBFWrapper
+sys.path.append(os.getcwd())
+from DeeGPs.TwoStageGPJustRBF import TwoStageGPJustRBFWrapper
 
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import ParameterGrid

@@ -50,7 +50,7 @@ forest = causal_forest(est_set[,.(X1,X2)], est_set[,Y], est_set[,D],
   imbalance.penalty = as.numeric(params["imbalance.penalty"])
 )
 
-test_X = fread('../../GPCorrection/output/test_data_for_R.csv')
+test_X = fread('output/test_grid.csv')
 cf_CATE_est = predict(forest,test_X)$prediction
 
 fwrite(data.table(cf_CATE_est),paste0(OUTDIR,'test_grid_tau_hats_from_CF.csv'))
