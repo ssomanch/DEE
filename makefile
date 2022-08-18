@@ -28,3 +28,8 @@ simulation_2: output/test_grid.csv
 	Rscript experiments/simulation_2/analyze_all_replications.R
 
 all: simulation_1 simulation_2
+
+# Step 2: Run simulation 1
+simulation_1_parallel: output/test_grid.csv
+	Rscript experiments/simulation_1/run_all_replications_parallel.R
+	Rscript experiments/simulation_1/analyze_all_replications.R
