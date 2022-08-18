@@ -35,19 +35,9 @@ top_M_prime_TEs = fread(paste0(OUTDIR,'/TE_estimates_at_voroni_KNN_centers_witho
 # Fit causal forest and get test set predictions
 ##########################################################
 
-Y.hat = predict(regression_forest(est_set[,.(X1,X2)], est_set[,Y]))$predictions
-W.hat = predict(regression_forest(est_set[,.(X1,X2)], est_set[,D]))$predictions
-
-params = tune_causal_forest(est_set[,.(X1,X2)], est_set[,Y], est_set[,D], Y.hat, W.hat)$params
-print(params)
-
 forest = causal_forest(est_set[,.(X1,X2)], est_set[,Y], est_set[,D],
   num.trees = 1000,
-  min.node.size = as.numeric(params["min.node.size"]),
-  sample.fraction = as.numeric(params["sample.fraction"]),
-  mtry = as.numeric(params["mtry"]),
-  alpha = as.numeric(params["alpha"]),
-  imbalance.penalty = as.numeric(params["imbalance.penalty"])
+  tune.parameters='all'
 )
 
 test_X = fread('output/test_grid.csv')

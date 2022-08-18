@@ -5,6 +5,7 @@ setup_renv:
 	mkdir -p renv/cellar
 	R CMD build LORD3 
 	mv LORD3_0.1.0.tar.gz renv/cellar/
+	R -e "renv::install('$(CURDIR)/renv/cellar/LORD3_0.1.0.tar.gz')"
 	R -e "renv::restore()"
 	
 setup_python_venv:
@@ -13,7 +14,7 @@ setup_python_venv:
 	
 # Step 2: Create test grid for benchmarking
 output/test_grid.csv: utils/get_test_x.py
-	mkdir output/
+	mkdir -p output/
 	python utils/get_test_x.py
 	
 # Step 2: Run simulation 1

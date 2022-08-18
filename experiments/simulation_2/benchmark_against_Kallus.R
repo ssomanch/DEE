@@ -50,19 +50,9 @@ true_cates = fread(paste0(OUTDIR,'/true_test_CATE_and_bias.csv'))
 ######################################################
 
 print("Fitting Causal Forest...")
-
-Y.hat = predict(regression_forest(obs_set[,.(X1,X2)], obs_set[,Y]))$predictions
-W.hat = predict(regression_forest(obs_set[,.(X1,X2)], obs_set[,D]))$predictions
-
-params = tune_causal_forest(obs_set[,.(X1,X2)], obs_set[,Y], obs_set[,D], Y.hat, W.hat)$params
-
 forest = causal_forest(obs_set[,.(X1,X2)], obs_set[,Y], obs_set[,D],
   num.trees = 1000,
-  min.node.size = as.numeric(params["min.node.size"]),
-  sample.fraction = as.numeric(params["sample.fraction"]),
-  mtry = as.numeric(params["mtry"]),
-  alpha = as.numeric(params["alpha"]),
-  imbalance.penalty = as.numeric(params["imbalance.penalty"])
+  tune.parameters='all'
 )
 
 ######################################################
@@ -73,14 +63,9 @@ forest = causal_forest(obs_set[,.(X1,X2)], obs_set[,Y], obs_set[,D],
 print("Fitting debiasing linear model...")
 
 # First fit propensity model and get reweighted target
-tuned_q_params = tune_regression_forest(local_RD_est_set[,.(X1,X2)], local_RD_est_set[,D])$params
 q = regression_forest(obs_set[,.(X1,X2)], obs_set[,D],
   num.trees = 1000,
-  min.node.size = as.numeric(tuned_q_params["min.node.size"]),
-  sample.fraction = as.numeric(tuned_q_params["sample.fraction"]),
-  mtry = as.numeric(tuned_q_params["mtry"]),
-  alpha = as.numeric(tuned_q_params["alpha"]),
-  imbalance.penalty = as.numeric(tuned_q_params["imbalance.penalty"])
+  tune.parameters='all'
 )
 eD = predict(q,local_RD_est_set[,.(X1,X2)])$predictions
 q = (local_RD_est_set$D/eD) - (1 - local_RD_est_set$D)/(1-eD)
