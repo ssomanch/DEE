@@ -25,7 +25,7 @@ OUTDIR = f'output/simulation_2/{args.seed1}/{args.CATE_ls}/{args.bias_ls}/'
 np.random.seed(args.seed1)
 torch.manual_seed(args.seed1)
 
-N = 5000
+N = 20000
 p = 2
 max_abs_rho = 0.9
 

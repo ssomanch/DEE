@@ -1,5 +1,5 @@
 set.seed(2212020)
-N_iter=2
+N_iter=50
 seed1_set = sample(.Machine$integer.max,N_iter)
 
 CATE_ls_grid = c('0.2','0.5')#3.0')
