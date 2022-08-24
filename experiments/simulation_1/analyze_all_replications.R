@@ -9,7 +9,7 @@ library(FNN)
 EXPERIMENT = 'simulation_1'
 ix_cols = c('seed1','CATE_ls','bias_ls','fname')
 
-valid_LSs = c('0.2','0.5')
+valid_LSs = c('0.3','0.45')
 
 y_upper = c(5,5.25,4.5,3.5)
 
