@@ -1,0 +1,71 @@
+.DEFAULT_GOAL=all
+.PHONY:all
+
+# Step 1: Load the data
+# Outputs two files -- roadsS.csv, and roads_w_controls.csv (with controls for original 2SLS specification)
+output/rural_roads/roads.csv: experiments/rural_roads/setup_roads_data.py
+	mkdir -p output/rural_roads/
+	python experiments/rural_roads/setup_roads_data.py
+
+# Step 2: Run LORD3
+output/rural_roads/roads_LORD3.csv: output/rural_roads/roads.csv experiments/rural_roads/run_ROADS_LORD3.R
+	Rscript experiments/rural_roads/run_roads_LORD3.R
+
+# Step 2b: Label the discovered RDDs as population/no-population
+output/rural_roads/roads_LORD3_w_RDD_category.csv: output/rural_roads/roads_LORD3.csv \
+                                                   experiments/rural_roads/categorize_discontinuity.R
+	Rscript experiments/rural_roads/categorize_discontinuity.R
+
+# Step 2c: Run balance checks to validate discovered RDDs
+output/rural_roads/roads_LORD3_w_RDD_category_and_p_val.csv: output/rural_roads/roads_LORD3_w_RDD_category.csv \
+                                                   experiments/rural_roads/balance_check_validate_RDs.R \
+                                                   experiments/rural_roads/balance_check_utils.R
+	Rscript experiments/rural_roads/balance_check_validate_RDs.R
+
+################################################
+# Steps 3, 4, and 5 are outcome specific
+################################################
+
+EST_SPECIFIC_ROOT=output/rural_roads/$(index)/$(RD_type)/$(estimator)__k_$(k_prime)__t_$(t_partition)__isotropic/
+
+# Step 3a: Fit causal forest
+output/rural_roads/$(index)/forest.rds: output/rural_roads/roads.csv\
+                                                    experiments/rural_roads/fit_CF.R
+	Rscript experiments/rural_roads/fit_CF.R $(index) $(RD_type) $(estimator) $(k_prime) $(t_partition)
+    
+# Step 3b: Run VKNN algorithm
+$(EST_SPECIFIC_ROOT)/roads_VKNN_ests.csv: output/rural_roads/roads_LORD3_w_RDD_category_and_p_val.csv \
+                                                      experiments/rural_roads/run_VKNN_repair.R \
+                                                      output/rural_roads/$(index)/forest.rds \
+                                                      experiments/rural_roads/balance_check_utils.R
+	Rscript experiments/rural_roads/run_VKNN_repair.R $(index) $(RD_type) $(estimator) $(k_prime) $(t_partition)
+
+# Step 4: Run subset 2SLS regressions. Outputs quartile_ivreg_results.csv
+output/rural_roads/$(index)/quartile_ivreg_results.csv: output/rural_roads/roads.csv experiments/rural_roads/get_spatial_subset_RDD_ests.R
+	Rscript experiments/rural_roads/get_spatial_subset_RDD_ests.R $(index)
+
+# Step 5: Run GP debiasing and dump summary tables and figures
+# Use quartile_spatial_hetero.png as representative output
+$(EST_SPECIFIC_ROOT)/quartile_spatial_hetero.png: output/rural_roads/$(index)/quartile_ivreg_results.csv \
+                                                  $(EST_SPECIFIC_ROOT)/roads_VKNN_ests.csv\
+                                                  experiments/rural_roads/run_gp_debiasing.py
+	python experiments/rural_roads/run_gp_debiasing.py --y=$(index) --RD-type=$(RD_type)\
+                                               --estimator=$(estimator) --k-prime=$(k_prime) --t-partition=$(t_partition)
+	
+
+################################################
+# Step 6 is a hack -- only runs for transport
+################################################
+
+# Step 6: Get VKNN descriptives
+# Use all_village_Ns.csv as representative output
+TRANSPORT_ROOT=output/rural_roads/transport_index_andrsn/$(RD_type)/$(estimator)__k_$(k_prime)__t_$(t_partition)__isotropic/
+$(TRANSPORT_ROOT)/all_village_Ns.csv: output/rural_roads/roads_LORD3_w_RDD_category_and_p_val.csv \
+                                         experiments/rural_roads/balance_check_utils.R \
+                                         experiments/rural_roads/get_voroni_neighborhood_descriptives.R
+	Rscript  experiments/rural_roads/get_voroni_neighborhood_descriptives.R transport_index_andrsn $(RD_type) $(estimator) $(k_prime) $(t_partition)
+
+all: output/rural_roads/$(index)/quartile_ivreg_results.csv \
+     $(EST_SPECIFIC_ROOT)/quartile_spatial_hetero.png \
+     $(TRANSPORT_ROOT)/all_village_Ns.csv
+

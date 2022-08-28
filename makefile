@@ -27,4 +27,8 @@ simulation_2: output/test_grid.csv
 	Rscript experiments/simulation_2/run_all_replications.R
 	Rscript experiments/simulation_2/analyze_all_replications.R
 
+# Step 4: Run rural roads application
+rural_roads:
+	./rural_roads_application.sh
+
 all: simulation_1 simulation_2
