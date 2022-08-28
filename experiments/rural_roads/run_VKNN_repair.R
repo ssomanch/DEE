@@ -1,5 +1,3 @@
-source('experiments/rural_roads/balance_check_utils.R')
-
 library(data.table)
 library(FNN)
 library(LORD3)
@@ -9,6 +7,9 @@ library(Matrix)
 library(AER)
 library(pracma)
 library(grf)
+
+source('experiments/rural_roads/balance_check_utils.R')
+source('utils/voroni_knn.R')
 
 ########################################################
 alpha = 0.05
@@ -34,7 +35,7 @@ if (RD_type == 'space_and_population'){
 } else {
   OUTDIR = paste0('output/rural_roads/',y_name,'/population/',estimator,'__k_',k_prime,'__t_',t_partition,'__isotropic/')
 }
-dir.create(OUTDIR, showWarnings = FALSE)
+dir.create(OUTDIR, showWarnings = FALSE, recursive = T)
 est_set = fread('output/rural_roads/roads_LORD3_w_RDD_category_and_p_val.csv')
 raw_roads = fread('output/rural_roads/roads.csv')
 scaled = scale(as.matrix(raw_roads[,.(longitude,latitude,total_pop)]))

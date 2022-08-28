@@ -12,7 +12,7 @@ library(tidyr)
 library(ggplot2)
 library(stringr)
 
-source('src/balance_check_utils.R')
+source('experiments/rural_roads/balance_check_utils.R')
 
 variable_map = c(
   primary_school = 'Primary school',
@@ -76,11 +76,11 @@ melted = melt(all_balance_df,id_vars = 'PopulationRD')
 melted$variable = plyr::mapvalues(melted$variable,names(variable_map),variable_map)
 melted$variable = str_wrap(melted$variable, width = 20)
             
-ggplot(data=melted,aes(x=value)) + geom_histogram() + 
+p1 = ggplot(data=melted,aes(x=value)) + geom_histogram() + 
   facet_grid(variable~PopulationRD,labeller = labeller(PopulationRD=label_both,variable=label_value)) +
   xlab('P-value for balance test') + ylab('Count (N discovered RDs in top M=1,500)') +
-  ggtitle('Balance checks on discovered RDs') + 
-  ggsave('output/rural_roads/figures/balance_p_vals.png',height=15,width=5)
+  ggtitle('Balance checks on discovered RDs')
+ggsave('output/rural_roads/figures/balance_p_vals.png',plot=p1,height=15,width=5)
               
 bound[,valid_RD:=c(valid_RD,rep(F,nrow(bound)-M_prime))]
 bound[,min_P:=c(min_P,rep(0,nrow(bound)-M_prime))]
@@ -90,9 +90,9 @@ fwrite(bound,'output/rural_roads/roads_LORD3_w_RDD_category_and_p_val.csv')
 
 # Make a final plot showing min-p
 bound[,`RD type`:=ifelse(total_pop_RD,'Population','Spatial')]
-ggplot(data=bound[top_M_prime == TRUE,],aes(x=min_P)) + geom_histogram(binwidth=alpha) + 
+p2 = ggplot(data=bound[top_M_prime == TRUE,],aes(x=min_P)) + geom_histogram(binwidth=alpha) + 
   facet_grid(~`RD type`,labeller = label_both, scales='free_y') +
   xlab('min(p) for balance test') + ylab('Count (N discovered RDs in top M=1,500)') +
   ggtitle('Balance checks on discovered RDs') + 
-  geom_vline(xintercept = alpha,linetype=2,color='red') + 
-  ggsave('output/rural_roads/figures/balance_min_p_vals.png',height=4,width=7)
+  geom_vline(xintercept = alpha,linetype=2,color='red')
+ggsave('output/rural_roads/figures/balance_min_p_vals.png',plot=p2,height=4,width=7)

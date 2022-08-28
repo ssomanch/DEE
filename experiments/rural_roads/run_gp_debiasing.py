@@ -2,11 +2,12 @@ import pandas as pd
 import numpy as np
 import scipy
 import sys
-
+import os
 from sklearn.metrics import pairwise_distances
 
-sys.path.append('../LORD3_experiments/')
-from PLP_BMA_utils import *
+import sys
+sys.path.append(os.getcwd())
+from DeeGPs.PLP_BMA_utils import *
 
 from torch import Tensor
 import gpytorch
@@ -58,6 +59,8 @@ OUTDIR = f"output/rural_roads/{y_name}/{RD_type}/{estimator}__k_{k_prime}__t_{t_
 
 #########################################
 # GP model specifications               #
+# Note we use an anisotropic GP for     #
+# real spatial data                     #
 #########################################
 torch.random.manual_seed(343165)
 

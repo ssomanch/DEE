@@ -1,4 +1,4 @@
-source('../LORD3_experiments/neighborhood_and_index_set_selection_utils.R')
+source('utils/voroni_knn.R')
 
 library(data.table)
 library(FNN)
@@ -27,19 +27,9 @@ est_set = fread('output/rural_roads/roads_LORD3.csv')
 Y = est_set[[y_name]]
 D = est_set$r2012
 
-Y.hat = predict(regression_forest(est_set[,.(longitude,latitude)], Y))$predictions
-W.hat = predict(regression_forest(est_set[,.(longitude,latitude)], D))$predictions
-
-params = tune_causal_forest(est_set[,.(longitude,latitude)], Y, D, Y.hat, W.hat)$params
-print(params)
-
 forest = causal_forest(est_set[,.(longitude,latitude)], Y, D,
   num.trees = 1000,
-  min.node.size = as.numeric(params["min.node.size"]),
-  sample.fraction = as.numeric(params["sample.fraction"]),
-  mtry = as.numeric(params["mtry"]),
-  alpha = as.numeric(params["alpha"]),
-  imbalance.penalty = as.numeric(params["imbalance.penalty"])
+  tune.parameters='all'
 )
 
 cf_CATE_est_w_var = predict(forest,est_set[,.(longitude,latitude)],
