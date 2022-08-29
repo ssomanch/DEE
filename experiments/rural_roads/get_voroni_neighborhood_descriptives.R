@@ -1,5 +1,5 @@
-source('../LORD3_experiments/neighborhood_and_index_set_selection_utils.R')
-source('src/balance_check_utils.R')
+source('utils/voroni_knn.R')
+source('experiments/rural_roads/balance_check_utils.R')
 
 library(data.table)
 library(FNN)

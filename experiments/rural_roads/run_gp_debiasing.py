@@ -289,6 +289,7 @@ for strategy in strategies:
 # Compute local estimate for comparison #
 #########################################
 
+print('Computing local estimates...')
 ests = {}
 
 # First compute the estimates for our GP debiasing method
@@ -314,6 +315,7 @@ with torch.no_grad():
 # Make two maps suggesting the spatial RDs #
 ############################################
 
+print('Making maps...')
 # Load indian state boundaries
 fname = 'data/rural_roads/India_States_ADM1_GADM-shp/3e563fd0-8ea1-43eb-8db7-3cf3e23174512020330-1-layr7d.ivha.shp'
 shape_feature = ShapelyFeature(Reader(fname).geometries(),
@@ -396,7 +398,7 @@ plt.savefig(f'{OUTDIR}/TE_map.png')
 ####################################################################################
 # Make errorbar plots for our local estimates vs. the subset IVREG estimates       #
 ####################################################################################
-
+print('Making error bar plots...')
 # Load the state labels
 all_raw_data = pd.read_csv('output/rural_roads/roads_w_controls.csv')
 merged['state'] = all_raw_data['pc01_state_name']
@@ -429,7 +431,7 @@ merged_ests = pd.merge(
     left_index=True,right_index=True
 )
 
-merged_ests.to_latex(f'{OUTDIR}/quartile_spatial_hetero.tex')
+merged_ests.style.to_latex(f'{OUTDIR}/quartile_spatial_hetero.tex')
 merged_ests.to_excel(f'{OUTDIR}/quartile_spatial_hetero.xlsx')
 
 # Make error bar plot
