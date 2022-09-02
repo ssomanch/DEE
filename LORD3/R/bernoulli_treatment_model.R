@@ -198,10 +198,106 @@ LORD3_binary = function(X,binary_y,binary_t,degree,k){
 
 
 run_LORD3_and_cbind_useful_output = function(X,Y,D,degree,k,nvec_col_names){
-	
 	# Run LORD3
 	lord3_results = LORD3_binary(X,Y,D,degree,k)
 	
+	# Extract likelihood ratio, rename normal vector columns, bind into data.table
+	LLR = lord3_results$LRR
+	normal_vectors = lord3_results$normal_vectors
+	colnames(normal_vectors) = nvec_col_names
+	all_results = as.data.frame(cbind(LLR,normal_vectors))
+	setDT(all_results)
+	return(all_results)
+}
+
+
+###################################
+# Parallelizing #
+###################################
+
+scan_one_point = function(ix,X,neighbors,y,t,p_hat_x,estimators){
+	neighborhood_ix = neighbors[ix,]
+	cneighborhood = center_neighborhood_ball(X,neighborhood_ix,X[ix,])
+	nt = t[neighborhood_ix]
+	ny = y[neighborhood_ix]
+	np_hat_x = p_hat_x[neighborhood_ix]
+	lrrs = get_all_group_LLRs(cneighborhood, nt, np_hat_x)
+	max_LLR = suppressWarnings(max(lrrs,na.rm=T)) # Throws warnings when all NA -- which happens if homogeneous groups
+	if (!is.infinite(max_LLR)){
+		max_normal_vector = cneighborhood[which.max(lrrs),]
+		best_grouping = bisect_neighborhood(cneighborhood, max_normal_vector)
+		
+		# Get estimates
+		ix_estimates = list()
+		for (est_ix in 1:length(estimators)){
+			estimator = estimators[[est_ix]]
+			est_name = names(estimators)[est_ix]
+			est = estimator(as.integer(best_grouping),ny,nt,cneighborhood,max_normal_vector)
+			names(est) = paste0(paste0(est_name,'__'),names(est))
+			ix_estimates = c(ix_estimates,est)
+		}
+		
+		observed_prop_delta = mean(nt[which(best_grouping==1)]) - mean(nt[which(best_grouping==0)])
+	} else {
+		max_normal_vector = rep(NA,ncol(X))
+		observed_prop_delta = NA
+		ix_estimates = list()
+		for (est_ix in 1:length(estimators)){
+			est = list(df=NA,se=NA,tau=NA)
+			est_name = names(estimators)[est_ix]
+			names(est) = paste0(paste0(est_name,'__'),names(est))
+			ix_estimates = c(ix_estimates,est)
+		}
+	}
+	return (list(max_LLR=max_LLR,
+							 max_normal_vector=max_normal_vector,
+							 observed_prop_delta=observed_prop_delta,
+							 ix_estimates=ix_estimates))
+}
+
+
+get_each_points_max_LRR_binary_parallel = function(X, neighbors, y, t, p_hat_x){
+	
+	estimators = list(nonparametric_estimator=nonparametric_estimator,
+										rotated_2SLS=rotated_2SLS)
+	
+	
+	each_point = foreach(ix=1:dim(neighbors)[1], .packages=c('AER','LORD3','data.table')) %dopar% {
+		scan_one_point(ix,X,neighbors,y,t,p_hat_x,estimators)
+	}
+	return(each_point)
+}
+
+
+LORD3_binary_parallel = function(X,binary_y,binary_t,degree,k){
+	
+	#### First we model T
+	df = as.data.frame(cbind(X,binary_t))
+	x_names = paste0('x',1:ncol(X))
+	colnames(df) = c(x_names,'t')
+	smooth_formula = as.formula(paste0('t~polym(',paste(x_names,collapse=', '),
+																		 ', degree=',degree,', raw=T)'))
+	binary_t_hat_func = glm(family=binomial(link='logit'),formula = smooth_formula, singular.ok=F, data=df)
+	p_hat_x = predict(binary_t_hat_func, df, type = "response")
+	
+	# Find the neighborhoods
+	binary_neighbors = get.knn(X, k = k)
+	
+	# Get full results
+	par_results = get_each_points_max_LRR_binary_parallel(X,binary_neighbors$nn.index, binary_y, binary_t, p_hat_x)
+	
+	max_LRR = sapply(par_results,function(x) x$max_LLR)
+	normal_vectors=t(sapply(par_results,function(x) x$max_normal_vector))
+	observed_prop_delta=sapply(par_results,function(x) x$observed_prop_delta)
+	estimates = rbindlist(lapply(par_results,function(x) x$ix_estimates),fill=T)
+	return(list(LRR=max_LRR,normal_vectors=normal_vectors,
+							observed_prop_delta=observed_prop_delta,
+							estimates=estimates))
+}
+
+run_LORD3_and_cbind_useful_output_parallel = function(X,Y,D,degree,k,nvec_col_names){
+	# Run LORD3
+	lord3_results = LORD3_binary_parallel(X,Y,D,degree,k)
 	# Extract likelihood ratio, rename normal vector columns, bind into data.table
 	LLR = lord3_results$LRR
 	normal_vectors = lord3_results$normal_vectors

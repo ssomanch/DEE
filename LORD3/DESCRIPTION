@@ -15,4 +15,5 @@ Imports:
     lmtest,
     mvtnorm,
     data.table,
-    pracma
+    pracma,
+    foreach

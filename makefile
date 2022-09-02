@@ -26,8 +26,10 @@ simulation_1: output/test_grid.csv
 simulation_2: output/test_grid.csv
 	Rscript experiments/simulation_2/run_all_replications.R
 	Rscript experiments/simulation_2/analyze_all_replications.R
-
-all: simulation_1 simulation_2
+	
+#############################################
+# Parallel execution of simulations 1 and 2 #
+#############################################
 
 # Step 2: Run simulation 1 parallel
 simulation_1_parallel: output/test_grid.csv
@@ -38,3 +40,15 @@ simulation_1_parallel: output/test_grid.csv
 simulation_2_parallel: output/test_grid.csv
 	Rscript experiments/simulation_2/run_all_replications_parallel.R
 	Rscript experiments/simulation_2/analyze_all_replications.R
+	
+#############################################
+# Rural roads parallelizes at level of      #
+# LORD3 RD discovery                        #
+#############################################
+
+# Step 4: Run rural roads
+rural_roads:
+	./rural_roads_application.sh
+
+all: simulation_1_parallel simulation_2_parallel rural_roads
+

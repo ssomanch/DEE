@@ -5,5 +5,6 @@ import(AER)
 import(mvtnorm)
 import(lmtest)
 import(data.table)
+import(foreach)
 
 exportPattern("^[[:alpha:]]+")
