@@ -67,9 +67,12 @@ forest = causal_forest(
 )
 
 test_X = fread('output/test_grid.csv')
-cf_CATE_est = predict(forest,test_X)$prediction
+# TODO: Need to update step 5 to also compute coverage probability. 
+cf.pred = predict(forest,test_X, estimate.variance=TRUE)
+cf_CATE_est = cf.pred$predictions
+cf_CATE_var = cf.pred$variance.estimates
 
-fwrite(data.table(cf_CATE_est),paste0(OUTDIR,'test_grid_tau_hats_from_CF.csv'))
+fwrite(data.table(cf_CATE_est, cf_CATE_var),paste0(OUTDIR,'test_grid_tau_hats_from_CF.csv'))
 
 ##########################################################
 # Get causal forest estimates + bias estimates at centers

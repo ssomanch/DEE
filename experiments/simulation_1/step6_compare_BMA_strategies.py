@@ -19,11 +19,22 @@ parser.add_argument('--seed1', help='Seed for sampling',type=int)
 parser.add_argument('--CATE-ls', help='Lengthscale for CATE GP prior',type=float)
 parser.add_argument('--bias-ls', help='Lengthscale for bias GP prior',type=float)
 parser.add_argument('--unfiltered', help='Use estimates in L, not U',action='store_true')
+parser.add_argument('--alpha', default = 0.05, type=float, 
+                    help='significance level for confidence region')
 
 args = parser.parse_args()
 
 unfiltered = args.unfiltered
 
+
+def contains_true_val(mean_pred, se_pred, true_val, alpha = 0.05):
+    '''
+    Checks if the true_val is with in the confidence interval based on mean_pred and se_pred
+    '''
+    ## Assuming normal distribution at each prediction 
+    z_alpha_by_2 = scipy.stats.norm.ppf(1-alpha/2)
+    return ((mean_pred - z_alpha_by_2*se_pred <= true_val) & (true_val <= mean_pred + z_alpha_by_2*se_pred))
+    
 #########################################
 # Set up the experiment                 #
 #########################################
@@ -48,7 +59,10 @@ test_x = np.concatenate([test_x1.flatten().reshape(1,-1).T,
 test_x = torch.from_numpy(test_x).type(torch.float)
 
 # Load the CF test grid estimates
-cf_test_CATE_est = pd.read_csv(f'{OUTDIR}/test_grid_tau_hats_from_CF.csv').cf_CATE_est
+cf_test_CATE_df = pd.read_csv(f'{OUTDIR}/test_grid_tau_hats_from_CF.csv')
+cf_test_CATE_est = cf_test_CATE_df.cf_CATE_est
+cf_test_CATE_var = cf_test_CATE_df.cf_CATE_var
+cf_test_CATE_se = np.sqrt(cf_test_CATE_var)
 
 # Load the true CATEs
 true_test_tau = pd.read_csv(f'{OUTDIR}/true_test_CATE_and_bias.csv').CATE
@@ -71,6 +85,7 @@ min_d = d.min(axis=1)
 target_cols = ['bias','CATE']
 results = {}
 gp_test_posterior_means = {}
+gp_test_posterior_se = {}
 for t in target_cols:
     print(f'Fitting {t} GP...')
     if unfiltered:
@@ -100,7 +115,13 @@ for t in target_cols:
     }
     if unfiltered:
         del results[t]['min dist']
-    gp_test_posterior_means[t] = gp.posterior(test_x).mu
+    posterior_df = gp.posterior(test_x)
+    
+    gp_test_posterior_means[t] = posterior_df.mu
+    # By defualt upper and lower returns two(2) standard deviations above and below the mean.
+    # https://docs.gpytorch.ai/en/v1.6.0/_modules/gpytorch/distributions/multivariate_normal.html
+    temp_lower, temp_upper = posterior_df.lower,  posterior_df.upper
+    gp_test_posterior_se[t] = (temp_upper - temp_lower)/(2*2)
     
 all_results = pd.DataFrame(results)
 
@@ -125,15 +146,28 @@ for strategy in strategies:
     posterior_weighted_mean = weights[0]*(cf_test_CATE_est - gp_test_posterior_means['bias']) +\
                               weights[1]*gp_test_posterior_means['CATE']
     
+    ## Assuming independence of causal forest estimate, posterior se for bias, and posterior se for cate
+    posterior_weighted_se = np.sqrt((weights[0]**2)*(cf_test_CATE_se**2 + gp_test_posterior_se['bias']**2) +\
+                                    (weights[1]**2)*(gp_test_posterior_se['CATE']))
+    
     if (results['bias'][strategy] > results['CATE'][strategy]):
         zero_one_weight = cf_test_CATE_est - gp_test_posterior_means['bias']
+        zero_one_weight_se = np.sqrt(cf_test_CATE_se**2 + gp_test_posterior_se['bias']**2)
     else:
         zero_one_weight = gp_test_posterior_means['CATE']
+        zero_one_weight_se = gp_test_posterior_se['CATE']
     
     all_weighted_MSEs[strategy] = {'Mixed MSE':mean_squared_error(posterior_weighted_mean,true_test_tau),
                                    'Percent bias in mixture':weights[0],
-                                   'Zero One MSE':mean_squared_error(zero_one_weight,true_test_tau)}
-    
+                                   'Zero One MSE':mean_squared_error(zero_one_weight,true_test_tau),
+                                   'Mixed CP': np.mean(contains_true_val(posterior_weighted_mean, 
+                                                                         posterior_weighted_se, 
+                                                                         true_test_tau, 
+                                                                         alpha=args.alpha)), 
+                                   'Zero One CP': np.mean(contains_true_val(zero_one_weight, 
+                                                                            zero_one_weight_se, 
+                                                                            true_test_tau, 
+                                                                            alpha=args.alpha))}
 all_weighted_MSEs = pd.DataFrame(all_weighted_MSEs)
 
 all_results = pd.concat([all_results,all_weighted_MSEs.T],axis=1)
