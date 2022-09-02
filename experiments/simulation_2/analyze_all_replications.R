@@ -8,7 +8,7 @@ library(latex2exp)
 EXPERIMENT = 'simulation_2'
 ix_cols = c('seed1','CATE_ls','bias_ls','fname')
 
-valid_LSs = c('0.2','0.5')
+valid_LSs = c('0.8','1.0')
 y_upper = c(.9,0.9,0.65,0.5)
 
 OUTDIR = paste0('output/',EXPERIMENT,'/summary_figures/')
