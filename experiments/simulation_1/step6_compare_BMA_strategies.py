@@ -19,7 +19,7 @@ parser.add_argument('--seed1', help='Seed for sampling',type=int)
 parser.add_argument('--CATE-ls', help='Lengthscale for CATE GP prior',type=float)
 parser.add_argument('--bias-ls', help='Lengthscale for bias GP prior',type=float)
 parser.add_argument('--unfiltered', help='Use estimates in L, not U',action='store_true')
-parser.add_argument('--alpha', default = 0.05, type=float, 
+parser.add_argument('--alpha', default = 0.1, type=float, 
                     help='significance level for confidence region')
 
 args = parser.parse_args()
@@ -27,13 +27,13 @@ args = parser.parse_args()
 unfiltered = args.unfiltered
 
 
-def contains_true_val(mean_pred, se_pred, true_val, alpha = 0.05):
+def contains_true_val(mean_pred, se_pred, true_val, alpha = 0.1):
     '''
     Checks if the true_val is with in the confidence interval based on mean_pred and se_pred
     '''
     ## Assuming normal distribution at each prediction 
     z_alpha_by_2 = scipy.stats.norm.ppf(1-alpha/2)
-    return ((mean_pred - z_alpha_by_2*se_pred <= true_val) & (true_val <= mean_pred + z_alpha_by_2*se_pred))
+    return ((mean_pred - z_alpha_by_2*se_pred < true_val) & (true_val < mean_pred + z_alpha_by_2*se_pred))
     
 #########################################
 # Set up the experiment                 #
@@ -118,9 +118,11 @@ for t in target_cols:
     posterior_df = gp.posterior(test_x)
     
     gp_test_posterior_means[t] = posterior_df.mu
+    
+    posterior_predictive_df = gp.posterior_predictive(test_x)
     # By defualt upper and lower returns two(2) standard deviations above and below the mean.
     # https://docs.gpytorch.ai/en/v1.6.0/_modules/gpytorch/distributions/multivariate_normal.html
-    temp_lower, temp_upper = posterior_df.lower,  posterior_df.upper
+    temp_lower, temp_upper = posterior_predictive_df.lower,  posterior_predictive_df.upper
     gp_test_posterior_se[t] = (temp_upper - temp_lower)/(2*2)
     
 all_results = pd.DataFrame(results)
@@ -147,12 +149,15 @@ for strategy in strategies:
                               weights[1]*gp_test_posterior_means['CATE']
     
     ## Assuming independence of causal forest estimate, posterior se for bias, and posterior se for cate
-    posterior_weighted_se = np.sqrt((weights[0]**2)*(cf_test_CATE_se**2 + gp_test_posterior_se['bias']**2) +\
-                                    (weights[1]**2)*(gp_test_posterior_se['CATE']))
+    # posterior_weighted_se = np.sqrt((weights[0]**2)*(cf_test_CATE_se**2 + gp_test_posterior_se['bias']**2) +\
+    #                                 (weights[1]**2)*(gp_test_posterior_se['CATE']**2))
+    posterior_weighted_se = np.sqrt((weights[0]**2)*(gp_test_posterior_se['bias']**2) +\
+                                    (weights[1]**2)*(gp_test_posterior_se['CATE']**2))
     
     if (results['bias'][strategy] > results['CATE'][strategy]):
         zero_one_weight = cf_test_CATE_est - gp_test_posterior_means['bias']
-        zero_one_weight_se = np.sqrt(cf_test_CATE_se**2 + gp_test_posterior_se['bias']**2)
+        #zero_one_weight_se = np.sqrt(cf_test_CATE_se**2 + gp_test_posterior_se['bias']**2)
+        zero_one_weight_se = gp_test_posterior_se['bias']
     else:
         zero_one_weight = gp_test_posterior_means['CATE']
         zero_one_weight_se = gp_test_posterior_se['CATE']

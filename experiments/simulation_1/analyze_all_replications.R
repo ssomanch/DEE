@@ -9,9 +9,11 @@ library(FNN)
 EXPERIMENT = 'simulation_1'
 ix_cols = c('seed1','CATE_ls','bias_ls','fname')
 
-valid_LSs = c('0.3','0.45')
+valid_LSs = c('0.2','0.8')
 
 y_upper = c(5,5.25,4.5,3.5)
+y_lower_cp = c(0.8, 0.8, 0.8, 0.8)
+y_upper_cp = c(1, 1, 1, 1)
 
 OUTDIR = paste0('output/',EXPERIMENT,'/summary_figures/')
 dir.create(OUTDIR, showWarnings = FALSE)
@@ -161,7 +163,7 @@ get_PLP_search_results = function(filtered){
 }
 
 
-get_original_results = function(filtered){
+get_original_results = function(filtered, metric='MSE'){
 	## Original results (unmixed baselines)
 	if (filtered){
 		all_outputs = list.files(paste0('output/',EXPERIMENT),'*_description.csv',recursive = T)
@@ -196,42 +198,59 @@ get_original_results = function(filtered){
 															'cf_ignoring_RDs_description_unfiltered.csv'),
 														to=c('Bias','CATE','Causal forest'))]
 	}
-	
-	# Compute the mean MSE using causal forest directly
-	CF_means = seeds_configs_and_paths %>%
-				filter(method=='Causal forest') %>%
-				filter((CATE_ls %in% valid_LSs) & (bias_ls %in% valid_LSs)) %>%
-				group_by(CATE_ls,bias_ls) %>%
-				summarise(m = mean(MSE),se=sd(MSE)/sqrt(n()),n=n())
-	CF_means$Strategy = 'BW'
+	if (metric=='MSE'){
+		# Compute the mean MSE using causal forest directly
+		CF_means = seeds_configs_and_paths %>%
+					filter(method=='Causal forest') %>%
+					filter((CATE_ls %in% valid_LSs) & (bias_ls %in% valid_LSs)) %>%
+					group_by(CATE_ls,bias_ls) %>%
+					summarise(m = mean(MSE),se=sd(MSE)/sqrt(n()),n=n())
+		CF_means$Strategy = 'BW'
 
-	# Compute the mean MSE using Cattaneo
-	Cattaneo_means = seeds_configs_and_paths %>%
-				filter(method=='Cattaneo') %>%
-				filter((CATE_ls %in% valid_LSs) & (bias_ls %in% valid_LSs)) %>%
-				group_by(CATE_ls,bias_ls) %>%
-				summarise(m = mean(MSE),se=sd(MSE)/sqrt(n()),n=n())
-	Cattaneo_means$Strategy = 'BW'
-	
-	# Compute the mean MSE using Kallus
-	Kallus_means = seeds_configs_and_paths %>%
-				filter(method=='Kallus') %>%
-				filter((CATE_ls %in% valid_LSs) & (bias_ls %in% valid_LSs)) %>%
-				group_by(CATE_ls,bias_ls) %>%
-				summarise(m = mean(MSE),se=sd(MSE)/sqrt(n()),n=n())
-	Kallus_means$Strategy = 'BW'
-	
-	seeds_configs_and_paths = seeds_configs_and_paths %>%
-		filter(method %in% c('CATE','Bias')) %>%
-		select(c(ix_cols,'MSE','method')) %>%
-		mutate(Mixture='Baseline',Strategy = method,value=MSE)
-	seeds_configs_and_paths = seeds_configs_and_paths[,Filtered:=filtered]
-	seeds_configs_and_paths = seeds_configs_and_paths[(CATE_ls %in% valid_LSs) & (bias_ls %in% valid_LSs)]
+		# Compute the mean MSE using Cattaneo
+		Cattaneo_means = seeds_configs_and_paths %>%
+					filter(method=='Cattaneo') %>%
+					filter((CATE_ls %in% valid_LSs) & (bias_ls %in% valid_LSs)) %>%
+					group_by(CATE_ls,bias_ls) %>%
+					summarise(m = mean(MSE),se=sd(MSE)/sqrt(n()),n=n())
+		Cattaneo_means$Strategy = 'BW'
+		
+		# Compute the mean MSE using Kallus
+		Kallus_means = seeds_configs_and_paths %>%
+					filter(method=='Kallus') %>%
+					filter((CATE_ls %in% valid_LSs) & (bias_ls %in% valid_LSs)) %>%
+					group_by(CATE_ls,bias_ls) %>%
+					summarise(m = mean(MSE),se=sd(MSE)/sqrt(n()),n=n())
+		Kallus_means$Strategy = 'BW'
+		
+		seeds_configs_and_paths = seeds_configs_and_paths %>%
+			filter(method %in% c('CATE','Bias')) %>%
+			select(c(ix_cols,'MSE','method')) %>%
+			mutate(Mixture='Baseline',Strategy = method,value=MSE)
+		seeds_configs_and_paths = seeds_configs_and_paths[,Filtered:=filtered]
+		seeds_configs_and_paths = seeds_configs_and_paths[(CATE_ls %in% valid_LSs) & (bias_ls %in% valid_LSs)]
 
-	return(list(seeds_configs_and_paths=seeds_configs_and_paths,
-				CF_means=CF_means,
-				Cattaneo_means=Cattaneo_means,
-				Kallus_means=Kallus_means))
+		return(list(seeds_configs_and_paths=seeds_configs_and_paths,
+					CF_means=CF_means,
+					Cattaneo_means=Cattaneo_means,
+					Kallus_means=Kallus_means))
+	}
+	else{
+		# TODO: Compute the mean CP using causal forest directly
+		
+		# TODO: Compute the mean CP using Cattaneo
+		
+		# TODO: Compute the mean CP using Kallus
+		
+		seeds_configs_and_paths = seeds_configs_and_paths %>%
+			filter(method %in% c('CATE','Bias')) %>%
+			select(c(ix_cols,'CP','method')) %>%
+			mutate(Mixture='Baseline',Strategy = method,value=CP)
+		seeds_configs_and_paths = seeds_configs_and_paths[,Filtered:=filtered]
+		seeds_configs_and_paths = seeds_configs_and_paths[(CATE_ls %in% valid_LSs) & (bias_ls %in% valid_LSs)]
+
+		return(list(seeds_configs_and_paths=seeds_configs_and_paths))
+	}
 }
 
 ################################################################
@@ -318,9 +337,9 @@ p = ggplot(filtered_PLP_search %>%
 ggsave(paste0(OUTDIR,'relative_MSE_reduction_mixture.png'),p,width=7,height=3)
 
 
-################################################################
-# Second figure: mean and SE MSEs over the test grid           #
-################################################################
+######################################################################################
+# Second figure: mean and SE MSEs over the test grid and coverage probability        #
+######################################################################################
 
 original_filtered = get_original_results(T)
 original_unfiltered = get_original_results(F)
@@ -403,3 +422,52 @@ p = ggplot(to_plot,aes(y=value,x=Strategy,color=Filtered)) +
 	guides(color=guide_legend(title="Alg. 1 applied"))
 
 ggsave(paste0(OUTDIR,'model_selection_MSE_comparison.png'),p,width=7,height=4)
+
+
+#################################
+# Plot for coverage proability  #
+#################################
+CP = both_PLP_search[,c(ix_cols,'Filtered',colnames(both_PLP_search)[grepl('CP',colnames(both_PLP_search))]),with=F]
+CP = pivot_longer(CP,cols = colnames(CP)[grepl('CP',colnames(CP))])
+
+strat_and_mix = str_split(CP$name,'_',simplify=T)
+colnames(strat_and_mix) = c('Strategy','Mixture')
+CP = cbind(CP,strat_and_mix) %>% mutate(Mixture = ifelse(grepl('Mixed',Mixture),'Mixture','Zero one'))
+
+original_filtered = get_original_results(T, metric = 'CP')
+original_unfiltered = get_original_results(F, metric = 'CP')
+	
+seeds_configs_and_paths = rbind(original_filtered$seeds_configs_and_paths,
+								original_unfiltered$seeds_configs_and_paths)
+
+to_plot = rbindlist(list(CP,seeds_configs_and_paths),fill=T) %>%
+		   mutate(`CATE lengthscale`=CATE_ls,`Bias lengthscale` = bias_ls) %>%
+		   filter(Mixture %in% c('Baseline','Mixture')) %>%
+		   filter(Strategy %in% c('Bias', 'CATE', 'MLL','LOO','random dist','min dist')) %>%
+		   mutate(Strategy = ifelse(Strategy == 'random dist','1-MC',
+		   							ifelse(Strategy == 'min dist','BW',Strategy))) %>%
+		   mutate(Strategy = factor(Strategy,levels=c('Bias','CATE','MLL','LOO','1-MC','BW')))
+
+
+# Set up ylims via blank data
+blank_data = tibble(`Bias lengthscale` = bias_v,
+					`CATE lengthscale` = cate_v,
+					Filtered = F,
+					x = 1, y = y_upper_cp)
+blank_data0 = tibble(`Bias lengthscale` = bias_v,
+					 `CATE lengthscale` = cate_v,
+					 Filtered = F,
+					 x = 1, y = y_lower_cp)
+
+p = ggplot(to_plot,aes(y=value,x=Strategy,color=Filtered)) + 
+	stat_summary(fun.data = mean_se, geom = "errorbar", fun.args=list(mult=1.96)) +
+	stat_summary(fun.data = mean_se, geom = "point", fun.args=list(mult=1.96)) +
+	facet_wrap(`CATE lengthscale` ~ `Bias lengthscale`,labeller = 'label_both',scales='free_y') + 
+	theme(axis.text.x = element_text(angle = 90,hjust = 0.95,vjust=0.5)) +
+	xlab('Model selection strategy') + 
+	ylab('Coverage Probability mean and 95% CI') + geom_blank(data = blank_data, aes(x = x, y = y)) + 
+	geom_blank(data = blank_data0, aes(x = x, y = y)) + 
+	ggtitle('Comparing MSEs for different model selection strategies') +
+	guides(color=guide_legend(title="Alg. 1 applied"))
+
+ggsave(paste0(OUTDIR,'model_selection_CP_comparison.png'),p,width=7,height=4)

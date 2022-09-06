@@ -135,10 +135,12 @@ class TwoStageGPJustRBFWrapper(object):
                 self.model.TE_model(test_x), noise=noise_posterior_mean.flatten()
             )
             lower_predictive, upper_predictive = predictive_posterior.confidence_region()
+            mu = predictive_posterior.mean
             
         to_plot = np.concatenate([test_x.numpy(),
                                   lower_predictive.numpy().reshape(-1,1),
-                                  upper_predictive.numpy().reshape(-1,1)],axis=1)
+                                  upper_predictive.numpy().reshape(-1,1), 
+                                  mu.detach().numpy().reshape(-1,1)],axis=1)
         to_plot = pd.DataFrame(to_plot)
         to_plot.columns = [f"X{i}" for i in range(1,test_x.shape[1]+1)] + ['lower','upper','mu']
 

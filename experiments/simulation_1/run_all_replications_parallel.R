@@ -5,8 +5,8 @@ N_iter=20
 n_cores = 20
 seed1_set = sample(.Machine$integer.max,N_iter)
 
-CATE_ls_grid = c('0.3','0.45')
-bias_ls_grid = c('0.3','0.45')
+CATE_ls_grid = c('0.2','0.8')
+bias_ls_grid = c('0.2','0.8')
 
 # Create all the directories first 
 

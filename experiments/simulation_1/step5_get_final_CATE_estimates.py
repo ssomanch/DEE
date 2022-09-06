@@ -3,6 +3,7 @@ import numpy as np
 import torch
 import os
 import sys
+import scipy
 sys.path.append(os.getcwd())
 from DeeGPs.TwoStageGPJustRBF import TwoStageGPJustRBFWrapper
 
@@ -17,6 +18,8 @@ parser.add_argument('--seed1', help='Seed for sampling',type=int)
 parser.add_argument('--CATE-ls', help='Lengthscale for CATE GP prior',type=float)
 parser.add_argument('--bias-ls', help='Lengthscale for bias GP prior',type=float)
 parser.add_argument('--unfiltered', help='Use estimates in L, not U',action='store_true')
+parser.add_argument('--alpha', default = 0.1, type=float, 
+                    help='significance level for confidence region')
 
 args = parser.parse_args()
 
@@ -28,7 +31,7 @@ OUTDIR  = f'output/simulation_1/{args.seed1}/{args.CATE_ls}/{args.bias_ls}/'
 # Utilities                                   #
 ###############################################
 
-def get_GP_model_outputs(train_x,train_y,CATE_est_var,GPmodel,target,test_x):
+def get_GP_model_outputs(train_x,train_y,CATE_est_var,GPmodel,target,test_x, alpha=0.1):
     # Step 1: fit model
     model = GPmodel()
     model.fit(train_x,train_y,CATE_est_var)
@@ -40,9 +43,21 @@ def get_GP_model_outputs(train_x,train_y,CATE_est_var,GPmodel,target,test_x):
     # Step 3: Get the MSE over the test set:
     mse = np.mean((posterior.mu.values - target.values)**2)
     
+    # Step 4: Get coverage probability
+    posterior_predictive_df = model.posterior_predictive(test_x)
+    # By defualt upper and lower returns two(2) standard deviations above and below the mean.
+    # https://docs.gpytorch.ai/en/v1.6.0/_modules/gpytorch/distributions/multivariate_normal.html
+    temp_lower, temp_upper = posterior_predictive_df.lower,  posterior_predictive_df.upper
+    std_err = (temp_upper - temp_lower)/(2*2)
+    ## Assuming normal distribution at each prediction 
+    z_alpha_by_2 = scipy.stats.norm.ppf(1-alpha/2)
+    cover_prob = np.mean((posterior.mu.values - z_alpha_by_2*std_err < target.values) & 
+                         (posterior.mu.values < posterior.mu.values + z_alpha_by_2*std_err))
+       
     return {'MSE':mse,
             'Description':model.describe(),
-            'LML':lml_train}
+            'LML':lml_train, 
+            'CP':cover_prob}
 
 def get_observational_estimator_scores(model_obs_est,true_test_tau):
 
@@ -50,11 +65,14 @@ def get_observational_estimator_scores(model_obs_est,true_test_tau):
     mse = np.mean((model_obs_est - true_test_tau)**2)
 
     return {'MSE':mse,
-            'Description':{}}
+            'Description':{}, 
+            'CP':1 # TODO: Need to fix this
+            }
 
 def save_outputs(model_results,root_dir,model_name,unfiltered):
     
     model_results['Description']['MSE'] = model_results['MSE']
+    model_results['Description']['CP'] = model_results['CP']
     
     if model_name != 'cf_ignoring_RDs':
         model_results['Description']['LML'] = model_results['LML']
@@ -89,6 +107,7 @@ else:
     CATE_est_var = torch.tensor(VKNN_ests.ses.values, dtype=torch.float)**2
 
 # Set up the test Xs
+# TODO: Probably read from test_grid.csv instead of recreating the test meshgrid again??
 test_x1,test_x2 = np.meshgrid(np.linspace(0,1,100),np.linspace(0,1,100))
 test_x = np.concatenate([test_x1.flatten().reshape(1,-1).T,
                         test_x2.flatten().reshape(1,-1).T],
