@@ -67,7 +67,6 @@ forest = causal_forest(
 )
 
 test_X = fread('output/test_grid.csv')
-# TODO: Need to update step 5 to also compute coverage probability. 
 cf.pred = predict(forest,test_X, estimate.variance=TRUE)
 cf_CATE_est = cf.pred$predictions
 cf_CATE_var = cf.pred$variance.estimates

@@ -1,6 +1,7 @@
 library(data.table)
 library(LORD3)
 library(Matrix)
+library(AER)
 
 options(dplyr.summarise.inform = FALSE)
 

@@ -10,14 +10,14 @@ library(RColorBrewer)
 
 get_voroni_knn_discontinuities_index_sets_and_estimates = function(
 		L_x, L_v, train_data, k_prime, t_partition, estimator,
-		save_plots=NULL,R2_figure=F
+		save_plots=NULL,R2_figure=F,vor_knn_ind = "vor_knn"
 	){
 	# Compute the Voroni KNN local RDs, and estimate CATE using `estimator`
 	# at the projected centroid
 	train_Xs = as.matrix(df[,colnames(L_x),with=F])
 
 	U_w_index_set = forward_stepwise_voroni_neighborhoods(
-		L_x,L_v,train_Xs,k_prime,t_partition,save_plots,R2_figure
+		L_x,L_v,train_Xs,k_prime,t_partition,save_plots,R2_figure,vor_knn_ind
 	)
 
 	voroni_neighbors_and_sides = U_w_index_set$voroni_neighbors_and_sides
@@ -37,7 +37,7 @@ get_voroni_knn_discontinuities_index_sets_and_estimates = function(
 }
 
 forward_stepwise_voroni_neighborhoods = function(L_x,L_v,train_Xs,k_prime,t_partition,
-												 save_plots=NULL,R2_figure=F){
+												 save_plots=NULL,R2_figure=F,vor_knn_ind = "vor_knn"){
 	#- Select set of neighborhood centers U = {}
 	#- For each neighborhood center x in L_x (in order):
 	#    - Add x to U and recompute the Voronoi diagram.
@@ -63,7 +63,7 @@ forward_stepwise_voroni_neighborhoods = function(L_x,L_v,train_Xs,k_prime,t_part
 		# Find voroni neighbors + sides, treating instances in U' as
 		# true discontinuity points
 		voroni_neighbors_and_sides = get_voroni_neighbors_knn_ball_intersection(
-			U_prime_x,U_prime_v,train_Xs,k_prime,R2_figure
+			U_prime_x,U_prime_v,train_Xs,k_prime,R2_figure, vor_knn_ind
 		)
 		# Check if they pass the threshold test
 		passes_thresh_and_n_per_side = check_passes_thresholds(
@@ -85,7 +85,7 @@ forward_stepwise_voroni_neighborhoods = function(L_x,L_v,train_Xs,k_prime,t_part
 	# Finall rerun using U_prime if needed
 	if (! all(passes_thresh_and_n_per_side$passes_thresh)){
 		voroni_neighbors_and_sides = get_voroni_neighbors_knn_ball_intersection(
-			U_x,U_v,train_Xs,k_prime,R2_figure
+			U_x,U_v,train_Xs,k_prime,R2_figure, vor_knn_ind
 		)
 	}
 
@@ -93,7 +93,7 @@ forward_stepwise_voroni_neighborhoods = function(L_x,L_v,train_Xs,k_prime,t_part
 				U_x = U_x, U_v = U_v))
 }
 
-get_voroni_neighbors_knn_ball_intersection = function(U_x,U_v,Xs,k,R2_figure){
+get_voroni_neighbors_knn_ball_intersection = function(U_x,U_v,Xs,k,R2_figure,vor_knn_ind = "vor_knn"){
 	# Computes the intersection of the KNN and Voroni neighborhoods,
 	# and side assignments, for each point in U_x.
 
@@ -109,10 +109,17 @@ get_voroni_neighbors_knn_ball_intersection = function(U_x,U_v,Xs,k,R2_figure){
 		cx = U_x[i,]
 		v = U_v[i,]
 
-		# Find the union of the voroni and knn neighbors
+		# Find the intersection of the voroni and knn neighbors
 		voroni_neighbors = which(neighborhood_assignment==i)
 		knn_neighbors = knn_assignments[i,]
-		intersection_neighbors = intersect(voroni_neighbors,knn_neighbors)
+		if (vor_knn_ind == "vor_knn"){
+			intersection_neighbors = intersect(voroni_neighbors,knn_neighbors)
+			} else if (vor_knn_ind == "vor"){
+			intersection_neighbors = voroni_neighbors
+			}
+			else {
+			intersection_neighbors = knn_neighbors
+		}
 		
 		# Partition across RD hyperplane
 		cXs = center_neighborhood_ball(Xs,intersection_neighbors,cx)

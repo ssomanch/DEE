@@ -117,6 +117,7 @@ rotated_2SLS = function(group, y, t, cX, nv){
     # background model.
     if (! is.na(tau)){
       se = coeftest(est, vcov. = vcov(est), df = est$df.residual)['D','Std. Error']
+      #se = coeftest(est, vcov = vcovHC, type="HC3")['D', 'Std. Error']
       df = df.residual(est)
     } else {
       se = NA

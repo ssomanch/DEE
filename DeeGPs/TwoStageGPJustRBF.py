@@ -7,6 +7,10 @@ import botorch
 import torch
 
 from gpytorch.mlls.leave_one_out_pseudo_likelihood import LeaveOneOutPseudoLikelihood
+from gpytorch.metrics import negative_log_predictive_density, mean_standardized_log_loss, quantile_coverage_error
+from gpytorch.distributions import MultitaskMultivariateNormal, MultivariateNormal
+from gpytorch.priors.smoothed_box_prior import SmoothedBoxPrior 
+from gpytorch.constraints.constraints import GreaterThan
 
 from sklearn.metrics import pairwise_distances
 
@@ -53,6 +57,7 @@ class TwoStageGPJustRBF(object):
             noise=observed_var,
             learn_additional_noise=False
         )
+        #self.TE_likelihood = GaussianLikelihood()
 
         self.TE_model = ExactGPModelJustRBF(
             train_x=train_x, train_y=train_y.flatten(), likelihood=self.TE_likelihood
@@ -134,6 +139,12 @@ class TwoStageGPJustRBFWrapper(object):
             predictive_posterior = self.model.TE_likelihood(
                 self.model.TE_model(test_x), noise=noise_posterior_mean.flatten()
             )
+            # predictive_posterior = self.model.TE_likelihood(
+            #     self.model.TE_model(test_x), noise=(torch.tensor(np.repeat(0.01, len(noise_posterior_mean)), dtype=torch.float)**2).flatten()
+            # )
+            
+            # predictive_posterior = self.model.TE_likelihood(
+            #     self.model.TE_model(test_x))
             lower_predictive, upper_predictive = predictive_posterior.confidence_region()
             mu = predictive_posterior.mean
             
@@ -193,6 +204,24 @@ class TwoStageGPJustRBFWrapper(object):
         posterior_marginal_mse = post_var + post_mu*(post_mu-2*o_b) + o_b**2
         return posterior_marginal_mse.mean()
 
+    def get_posterior_predictive_metrics(self, test_x, true_te, quantile = 95):
+        noise_posterior_mean = torch.clamp(torch.tensor(self.noise_posterior(test_x).mu.values),
+                                           MIN_SE)
+        with torch.no_grad():
+            predictive_posterior = self.model.TE_likelihood(
+                self.model.TE_model(test_x), noise=noise_posterior_mean.flatten()
+            )
+            true_te_tensor = torch.from_numpy(true_te).float()
+            nlpd = negative_log_predictive_density(predictive_posterior, true_te_tensor)
+            msll = mean_standardized_log_loss(predictive_posterior, true_te_tensor)
+            qce = quantile_coverage_error(predictive_posterior, true_te_tensor, quantile=quantile)
+            
+            print(predictive_posterior.log_prob(true_te_tensor)/true_te_tensor[-1], true_te_tensor.shape[-1])
+        
+        return {'nlpd': nlpd.item(), 
+                'msll': msll.item(), 
+                'qce': qce.item()}
+        
     def get_CV_PLP(self,train_x,train_y,observed_var,k=None,thresh=None):
         
         dists = pairwise_distances(train_x)

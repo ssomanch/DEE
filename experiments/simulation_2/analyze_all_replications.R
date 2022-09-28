@@ -8,7 +8,7 @@ library(latex2exp)
 EXPERIMENT = 'simulation_2'
 ix_cols = c('seed1','CATE_ls','bias_ls','fname')
 
-valid_LSs = c('0.8','1.0')
+valid_LSs = c('0.2','0.5')
 y_upper = c(.9,0.9,0.65,0.5)
 
 OUTDIR = paste0('output/',EXPERIMENT,'/summary_figures/')
@@ -282,9 +282,9 @@ to_plot[['CATE lengthscale']] = to_plot$CATE_ls
 
 to_plot = to_plot[(to_plot$bias_ls != to_plot$CATE_ls),]
 
- p = ggplot(to_plot,aes(x=Likelihood,y=y,ymin=ymin,ymax=ymax,color=Likelihood)) + 
+ p = ggplot(to_plot,aes(x=factor(Likelihood, level = c('MLL', 'LOO', '1-MC', 'BW')),y=y,ymin=ymin,ymax=ymax,color=Likelihood)) + 
 		geom_errorbar() + facet_wrap(`CATE lengthscale`~`Bias lengthscale`,scales='free',labeller = label_both) + geom_point()+
-		ylab('(CATE log likelihood) - (bias log likelihood)\n Mean and 95% CI')
+		ylab('(CATE log likelihood) - (bias log likelihood)\n Mean and 95% CI') + xlab('Likelihood')
 
 ggsave(paste0(OUTDIR,'likelihood_deltas.png'),p,width=7,height=3)
 
@@ -350,8 +350,8 @@ for (cls in valid_LSs){
 	for (bls in valid_LSs){
 		subdf = both_sum_stats %>% 
 							filter((CATE_ls == cls) & (bias_ls == bls)) %>% 
-							mutate(`MSE (SE)`=paste0(round(m,2), ' (',round(se,2),')'))
-		tb = t(subdf[,c('MSE (SE)')])
+							mutate(`MSE & CI`=paste0(round(m,2), '±',round(1.96*se,2)))
+		tb = t(subdf[,c('MSE & CI')])
 		
 		colnames(tb) = t(subdf[,c('Benchmark')])
 		
@@ -389,7 +389,9 @@ p = ggplot(to_plot,aes(y=value,x=Strategy,color=Filtered)) +
 	geom_table(data = annot_t %>%
 			            mutate(`Bias lengthscale`=bias_ls,
 							   `CATE lengthscale`=CATE_ls),
-			   aes(table = t), x = 3.5, y = 0.875*y_upper, rownames = "MSE (SE)",basesize=6) +
-	guides(color=guide_legend(title="Alg. 1 applied"))
+			   aes(table = t), x = 3.5, y = 0.875*y_upper, rownames = "MSE & CI",basesize=6) +
+	guides(color=guide_legend(title="RDs used")) + 
+	theme(legend.title = element_text(size=12), legend.text = element_text(size=9))+
+	scale_colour_discrete(labels=c("Original", 'Repaired \n (from Alg. 1)'))
 
 ggsave(paste0(OUTDIR,'model_selection_MSE_comparison.png'),p,width=7,height=4)

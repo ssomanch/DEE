@@ -52,6 +52,11 @@ else:
     train_x = torch.tensor(VKNN_ests[['X1','X2']].values, dtype=torch.float)
     CATE_est_var = torch.tensor(VKNN_ests.ses.values, dtype=torch.float)**2
 
+# # JUST FOR EXPERIMENTATION: NEED TO BE REMOVED
+# index_var_less_5 = (CATE_est_var <5).nonzero().transpose(0,1)[0]
+# CATE_est_var = CATE_est_var[index_var_less_5]
+# train_x = train_x[index_var_less_5]
+
 test_x1,test_x2 = np.meshgrid(np.linspace(0,1,100),np.linspace(0,1,100))
 test_x = np.concatenate([test_x1.flatten().reshape(1,-1).T,
                         test_x2.flatten().reshape(1,-1).T],
@@ -93,6 +98,9 @@ for t in target_cols:
     else:
         train_y = torch.from_numpy(VKNN_ests[t].values).type(torch.float)
 
+    # # JUST FOR EXPERIMENTATION: NEED TO BE REMOVED
+    # train_y = train_y[index_var_less_5]
+    
     gp = TwoStageGPJustRBFWrapper()
     gp.fit(train_x,train_y,CATE_est_var)
     lml = gp.get_lml(train_x,train_y,CATE_est_var)
@@ -122,7 +130,7 @@ for t in target_cols:
     posterior_predictive_df = gp.posterior_predictive(test_x)
     # By defualt upper and lower returns two(2) standard deviations above and below the mean.
     # https://docs.gpytorch.ai/en/v1.6.0/_modules/gpytorch/distributions/multivariate_normal.html
-    temp_lower, temp_upper = posterior_predictive_df.lower,  posterior_predictive_df.upper
+    temp_lower, temp_upper = posterior_df.lower,  posterior_df.upper
     gp_test_posterior_se[t] = (temp_upper - temp_lower)/(2*2)
     
 all_results = pd.DataFrame(results)
@@ -149,15 +157,15 @@ for strategy in strategies:
                               weights[1]*gp_test_posterior_means['CATE']
     
     ## Assuming independence of causal forest estimate, posterior se for bias, and posterior se for cate
-    # posterior_weighted_se = np.sqrt((weights[0]**2)*(cf_test_CATE_se**2 + gp_test_posterior_se['bias']**2) +\
-    #                                 (weights[1]**2)*(gp_test_posterior_se['CATE']**2))
-    posterior_weighted_se = np.sqrt((weights[0]**2)*(gp_test_posterior_se['bias']**2) +\
+    posterior_weighted_se = np.sqrt((weights[0]**2)*(cf_test_CATE_se**2 + gp_test_posterior_se['bias']**2) +\
                                     (weights[1]**2)*(gp_test_posterior_se['CATE']**2))
+    # posterior_weighted_se = np.sqrt((weights[0]**2)*(gp_test_posterior_se['bias']**2) +\
+    #                                 (weights[1]**2)*(gp_test_posterior_se['CATE']**2))
     
     if (results['bias'][strategy] > results['CATE'][strategy]):
         zero_one_weight = cf_test_CATE_est - gp_test_posterior_means['bias']
-        #zero_one_weight_se = np.sqrt(cf_test_CATE_se**2 + gp_test_posterior_se['bias']**2)
-        zero_one_weight_se = gp_test_posterior_se['bias']
+        zero_one_weight_se = np.sqrt(cf_test_CATE_se**2 + gp_test_posterior_se['bias']**2)
+        #zero_one_weight_se = gp_test_posterior_se['bias']
     else:
         zero_one_weight = gp_test_posterior_means['CATE']
         zero_one_weight_se = gp_test_posterior_se['CATE']
