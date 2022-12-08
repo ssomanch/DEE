@@ -2,11 +2,11 @@ library(doParallel)
 
 set.seed(2212020)
 N_iter=50
-n_cores = 50
+n_cores = 20
 seed1_set = sample(.Machine$integer.max,N_iter)
 
-CATE_ls_grid = c('0.2')
-bias_ls_grid = c('0.5')
+CATE_ls_grid = c('0.2', '0.5')
+bias_ls_grid = c('0.2', '0.5')
 
 # Create all the directories first 
 

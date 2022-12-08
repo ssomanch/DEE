@@ -10,8 +10,8 @@ library(pracma)
 options(dplyr.summarise.inform = FALSE)
 source('utils/voroni_knn.R')
 
-M_prime = 10000
-k_prime = 500
+M_prime = 400
+k_prime = 1000
 t_partition = 30
 estimator = 'rotated_2SLS'
 nvec_col_names = c('raw_nvec1','raw_nvec2')

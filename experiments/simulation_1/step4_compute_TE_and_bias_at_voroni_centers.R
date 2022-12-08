@@ -54,23 +54,6 @@ voroni_assets = get_voroni_knn_discontinuities_index_sets_and_estimates(
 
 top_M_prime_TEs = voroni_assets$top_M_prime_TEs
 
-# print("Avoiding Voroni KNN repair algorithm and using created VORONOI Centers and true CATEs with jitter")
-# created_voroni = fread(paste0('output/simulation_1/',
-# 							  seed1, '/voroni_KNN_centers__ignore_TE_estimates.csv'))
-
-# true_CATE_and_e_bias = fread(paste0(OUTDIR,'true_CATE_and_bias_at_voroni_KNN_centers.csv'))
-
-# CATE_jitter = 0.1
-# est_cate = true_CATE_and_e_bias$CATE + rnorm(nrow(true_CATE_and_e_bias), mean=0, sd=CATE_jitter)
-# ses_mean = 1
-# ses_sd = 0.5
-# est_ses = rnorm(nrow(true_CATE_and_e_bias), mean=ses_mean, sd = ses_sd)
-
-# created_voroni$CATE = est_cate
-# created_voroni$ses = est_ses
-
-# top_M_prime_TEs = created_voroni[, !c("lower", "upper", "df")]
-
 ##########################################################
 # Fit causal forest and get test set predictions
 ##########################################################
