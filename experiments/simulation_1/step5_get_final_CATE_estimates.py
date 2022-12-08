@@ -55,42 +55,42 @@ def get_GP_model_outputs(train_x,train_y,CATE_est_var,GPmodel,target,test_x, mod
     # Step 3: Get the MSE over the test set:
     mse = np.mean((posterior.mu.values - target.values)**2)
     
-    # Step 4: Get coverage probability
-    posterior_predictive_df = model.posterior_predictive(test_x)
-    # By defualt upper and lower returns two(2) standard deviations above and below the mean.
-    # https://docs.gpytorch.ai/en/v1.6.0/_modules/gpytorch/distributions/multivariate_normal.html
-    temp_lower, temp_upper = posterior.lower,  posterior.upper
-    std_dev = (temp_upper - temp_lower)/(2*2)
-    print("Posterior Standard Error")
-    print((np.mean(std_dev**2))**(0.5))
-    #print(std_dev.describe())
+    # # Step 4: Get coverage probability
+    # posterior_predictive_df = model.posterior_predictive(test_x)
+    # # By defualt upper and lower returns two(2) standard deviations above and below the mean.
+    # # https://docs.gpytorch.ai/en/v1.6.0/_modules/gpytorch/distributions/multivariate_normal.html
+    # temp_lower, temp_upper = posterior.lower,  posterior.upper
+    # std_dev = (temp_upper - temp_lower)/(2*2)
+    # print("Posterior Standard Error")
+    # print((np.mean(std_dev**2))**(0.5))
+    # #print(std_dev.describe())
     
-    ## Assuming normal distribution at each prediction 
-    z_alpha_by_2 = scipy.stats.norm.ppf(1-alpha/2)
-    if (model_name == "bias"):
-        temp_est = cf_target_est - posterior.mu.values
-        temp_target = cf_target_est - target.values
-        temp_std = np.sqrt(std_dev**2 + cf_target_var)
-        cover_prob_post = np.mean((temp_est - z_alpha_by_2*temp_std < temp_target) &
-                                  (temp_target < temp_est + z_alpha_by_2*temp_std))
-    else:
-        cover_prob_post = np.mean((posterior.mu.values - z_alpha_by_2*std_dev < target.values) & 
-                                  (target.values < posterior.mu.values + z_alpha_by_2*std_dev))
+    # ## Assuming normal distribution at each prediction 
+    # z_alpha_by_2 = scipy.stats.norm.ppf(1-alpha/2)
+    # if (model_name == "bias"):
+    #     temp_est = cf_target_est - posterior.mu.values
+    #     temp_target = cf_target_est - target.values
+    #     temp_std = np.sqrt(std_dev**2 + cf_target_var)
+    #     cover_prob_post = np.mean((temp_est - z_alpha_by_2*temp_std < temp_target) &
+    #                               (temp_target < temp_est + z_alpha_by_2*temp_std))
+    # else:
+    #     cover_prob_post = np.mean((posterior.mu.values - z_alpha_by_2*std_dev < target.values) & 
+    #                               (target.values < posterior.mu.values + z_alpha_by_2*std_dev))
     
-    print(f"Posterior Coverage Probability is {cover_prob_post}")
+    # print(f"Posterior Coverage Probability is {cover_prob_post}")
     
-    temp_lower, temp_upper = posterior_predictive_df.lower,  posterior_predictive_df.upper
-    std_dev = (temp_upper - temp_lower)/(2*2)
-    print("Posterior Predictive Standard Error")
-    print((np.mean(std_dev**2))**(0.5))
-    #print(std_dev.describe())
+    # temp_lower, temp_upper = posterior_predictive_df.lower,  posterior_predictive_df.upper
+    # std_dev = (temp_upper - temp_lower)/(2*2)
+    # print("Posterior Predictive Standard Error")
+    # print((np.mean(std_dev**2))**(0.5))
+    # #print(std_dev.describe())
     
-    # Assuming normal distribution at each prediction 
-    z_alpha_by_2 = scipy.stats.norm.ppf(1-alpha/2)
-    cover_prob_pred = np.mean((posterior.mu.values - z_alpha_by_2*std_dev < target.values) & 
-                         (target.values < posterior.mu.values + z_alpha_by_2*std_dev))
+    # # Assuming normal distribution at each prediction 
+    # z_alpha_by_2 = scipy.stats.norm.ppf(1-alpha/2)
+    # cover_prob_pred = np.mean((posterior.mu.values - z_alpha_by_2*std_dev < target.values) & 
+    #                      (target.values < posterior.mu.values + z_alpha_by_2*std_dev))
     
-    print(f"Posterior Predictive Coverage Probability is {cover_prob_pred}")
+    # print(f"Posterior Predictive Coverage Probability is {cover_prob_pred}")
     
     
     
@@ -103,8 +103,8 @@ def get_GP_model_outputs(train_x,train_y,CATE_est_var,GPmodel,target,test_x, mod
     test_df_to_save['posterior_mu'] = posterior.mu.values
     # test_df_to_save['post_pred_lower'] = posterior_predictive_df.lower
     # test_df_to_save['post_pred_upper'] = posterior_predictive_df.upper
-    test_df_to_save['post_lower'] = posterior.lower
-    test_df_to_save['post_upper'] = posterior.upper
+    # test_df_to_save['post_lower'] = posterior.lower
+    # test_df_to_save['post_upper'] = posterior.upper
     test_df_to_save['target'] = target.values
     
     if unfiltered:
@@ -123,8 +123,8 @@ def get_GP_model_outputs(train_x,train_y,CATE_est_var,GPmodel,target,test_x, mod
     # print("Noise Posterior Standard Error")
     # print((np.mean(noise_df.mu))**(0.5))
     
-    print("Noise Prior Standard Error")
-    print(np.mean(CATE_est_var.numpy())**0.5)
+    # print("Noise Prior Standard Error")
+    # print(np.mean(CATE_est_var.numpy())**0.5)
     
     #print(pd.Series(target.values).describe())
     #print(pd.Series(posterior.mu.values).describe())
@@ -136,8 +136,7 @@ def get_GP_model_outputs(train_x,train_y,CATE_est_var,GPmodel,target,test_x, mod
        
     return {'MSE':mse,
             'Description':model.describe(),
-            'LML':lml_train, 
-            'CP':cover_prob_post}
+            'LML':lml_train}
 
 def get_observational_estimator_scores(model_obs_est,true_test_tau):
 
@@ -145,14 +144,12 @@ def get_observational_estimator_scores(model_obs_est,true_test_tau):
     mse = np.mean((model_obs_est - true_test_tau)**2)
 
     return {'MSE':mse,
-            'Description':{}, 
-            'CP':1 # TODO: Need to fix this
+            'Description':{}
             }
 
 def save_outputs(model_results,root_dir,model_name,unfiltered):
     
     model_results['Description']['MSE'] = model_results['MSE']
-    model_results['Description']['CP'] = model_results['CP']
     
     if model_name != 'cf_ignoring_RDs':
         model_results['Description']['LML'] = model_results['LML']

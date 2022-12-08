@@ -1,0 +1,12 @@
+Here we divide the steps for simulation 1 into three steps as there is huge memory requirement to run step 3. 
+
+
+1. Change the run_all_replications_parallel.R to make sure we have CATE_ls = 0.2 and bias_ls = 0.5
+2. Step 1, set N = 200K
+3. Change the run_all_replications_parallel to include to run run_one_replication_upto_step2.makefile, specifically set --sample-at-RDD 1
+4. Run make simulation_1_parallel
+5. Run Rscript Create_step3_jobs.R
+6. Then submit the jobs to run step3_sample_CATE_bias_and_Y. That is run, submit_all_jobs.sh
+7. Change the run_all_replications_parallel.R back to run run_one_replication.makefile
+8. Run make simulation_1_parallel
+9. Rscript analyze_all_replications_modified.R
