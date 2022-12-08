@@ -86,10 +86,13 @@ parser = argparse.ArgumentParser(description='Sample CATE, bias and Y')
 parser.add_argument('--seed1', help='Seed for sampling',type=int)
 parser.add_argument('--CATE-ls', help='Lengthscale for CATE GP prior',type=float)
 parser.add_argument('--bias-ls', help='Lengthscale for bias GP prior',type=float)
+parser.add_argument('--root-dir', help='Path to root directory which contains output',type=str, default='')
 
 args = parser.parse_args()
 
-OUTDIR = f'output/simulation_1/{args.seed1}/{args.CATE_ls}/{args.bias_ls}/'
+root_dir = args.root_dir
+
+OUTDIR = f'{root_dir}output/simulation_1/{args.seed1}/{args.CATE_ls}/{args.bias_ls}/'
 
 np.random.seed(args.seed1)
 torch.manual_seed(args.seed1)
