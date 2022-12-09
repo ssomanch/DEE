@@ -8,7 +8,7 @@ output/rural_roads/roads.csv: experiments/rural_roads/setup_roads_data.py
 	python experiments/rural_roads/setup_roads_data.py
 
 # Step 2: Run LORD3
-output/rural_roads/roads_LORD3.csv: output/rural_roads/roads.csv experiments/rural_roads/run_ROADS_LORD3.R
+output/rural_roads/roads_LORD3.csv: output/rural_roads/roads.csv experiments/rural_roads/run_roads_LORD3.R
 	Rscript experiments/rural_roads/run_roads_LORD3.R
 
 # Step 2b: Label the discovered RDDs as population/no-population

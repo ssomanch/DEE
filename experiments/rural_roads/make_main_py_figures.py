@@ -215,7 +215,8 @@ plt.savefig('output/rural_roads/figures/ATE_by_outcomes.png')
 #######################################################
 
 # Load indian state boundaries
-fname = 'data/rural_roads/India_States_ADM1_GADM-shp/3e563fd0-8ea1-43eb-8db7-3cf3e23174512020330-1-layr7d.ivha.shp'
+#fname = 'data/rural_roads/India_States_ADM1_GADM-shp/3e563fd0-8ea1-43eb-8db7-3cf3e23174512020330-1-layr7d.ivha.shp'
+fname = 'data/rural_roads/India_States_AMD1_GADM-shp/India_State_Boundary.shp'
 shape_feature = ShapelyFeature(Reader(fname).geometries(),
                                 ccrs.PlateCarree(), edgecolor='black')
 

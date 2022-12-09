@@ -27,9 +27,10 @@ D = est_set$r2012
 print("Running full sample LORD3...")
 
 # set up combine function
-split = detectCores()
-cl = makeCluster(split)
-registerDoParallel(cl)
+#split = detectCores()
+#cl = makeCluster(split)
+cl = 50
+registerDoParallel(cores=cl)
 
 LORD3_results = run_LORD3_and_cbind_useful_output_parallel(X,Y,D,degree,k,nvec_col_names)
 

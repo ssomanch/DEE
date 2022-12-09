@@ -317,7 +317,8 @@ with torch.no_grad():
 
 print('Making maps...')
 # Load indian state boundaries
-fname = 'data/rural_roads/India_States_ADM1_GADM-shp/3e563fd0-8ea1-43eb-8db7-3cf3e23174512020330-1-layr7d.ivha.shp'
+#fname = 'data/rural_roads/India_States_ADM1_GADM-shp/3e563fd0-8ea1-43eb-8db7-3cf3e23174512020330-1-layr7d.ivha.shp'
+fname = 'data/rural_roads/India_States_AMD1_GADM-shp/India_State_Boundary.shp'
 shape_feature = ShapelyFeature(Reader(fname).geometries(),
                                 ccrs.PlateCarree(), edgecolor='black')
 
@@ -442,8 +443,8 @@ to_plot = pd.concat([local_ests.assign(Est='Asher & Novosad RDD'),
 to_plot.to_csv(f'{OUTDIR}/full_and_state_specific_TE_estimates.csv')
 
 fig,ax = plt.subplots(figsize=(9,6))
-ax = sns.pointplot('State', 'Estimate', hue='Est',
-                   data=to_plot, dodge=True, join=False, ci=None)
+ax = sns.pointplot(data=to_plot, x ='State', y='Estimate', hue='Est',
+                   dodge=True, join=False, errorbar=None)
 
 # Find the x,y coordinates for each point
 x_coords = []
