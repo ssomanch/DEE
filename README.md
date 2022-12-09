@@ -38,14 +38,29 @@ The final directory structure should be
 ```
 DEE/
 	└── data/rural_roads/
-				├── pmgsy_working_aer.dta
-				├── pmgsy_working_aer_mainsample.dta
-				└── India_States_AMD1_GADM-shp/
-					├── India_State_Boundary.shx
-					├── India_State_Boundary.shp
-					├── India_State_Boundary.prj
-					├── India_State_Boundary.dbf
-					└── India_State_Boundary.cpg
+			├── pmgsy_working_aer.dta
+			├── pmgsy_working_aer_mainsample.dta
+			└── India_States_AMD1_GADM-shp/
+				├── India_State_Boundary.shx
+				├── India_State_Boundary.shp
+				├── India_State_Boundary.prj
+				├── India_State_Boundary.dbf
+				└── India_State_Boundary.cpg
+```
+#### Running Rural Raods
+
+To run rural roads, run
+
+```
+make rural_roads
+```
+
+To produce figures and summary statistics, run 
+
+```
+python experiments/rural_roads/make_main_py_figures.py
+Rscript experiments/rural_roads/make_main_R_figures.R
+python experiments/rural_roads/stack_neighborhood_descriptives.py
 ```
 
 #### References

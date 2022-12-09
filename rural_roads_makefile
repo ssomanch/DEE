@@ -5,6 +5,7 @@
 # Outputs two files -- roadsS.csv, and roads_w_controls.csv (with controls for original 2SLS specification)
 output/rural_roads/roads.csv: experiments/rural_roads/setup_roads_data.py
 	mkdir -p output/rural_roads/
+	mkdir -p output/rural_roads/figures/
 	python experiments/rural_roads/setup_roads_data.py
 
 # Step 2: Run LORD3
