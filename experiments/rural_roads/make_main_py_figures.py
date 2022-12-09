@@ -51,11 +51,11 @@ def get_table_and_figure(estimator,k,t):
     ###################################
     
     target_TE_ests = glob.glob(f'output/rural_roads/**/{estimator}__k_{k}__t_{t}__isotropic/full_and_state_specific_TE_estimates.csv',recursive=True)
-    index_and_RDDs = pd.DataFrame([x.split('/') for x in target_TE_ests]).iloc[:,[1,3]]
+    index_and_RDDs = pd.DataFrame([x.split('/') for x in target_TE_ests]).iloc[:,[2,3]]
     index_and_RDDs['path'] = target_TE_ests
     all_dfs = []
     for i,r in index_and_RDDs.iterrows():
-        all_dfs.append(pd.read_csv(r['path'],index_col=0).assign(Y=r[1],RDDs=r[3]))
+        all_dfs.append(pd.read_csv(r['path'],index_col=0).assign(Y=r[2],RDDs=r[3]))
         
     all_dfs = pd.concat(all_dfs,axis=0)
     all_dfs = all_dfs.loc[~((all_dfs.Est=='Asher & Novosad RDD') & (all_dfs.RDDs=='space_and_population'))]
@@ -91,8 +91,8 @@ def get_table_and_figure(estimator,k,t):
 
     rgb_values = sns.color_palette("Set2", n_methods)
     palette = sns.color_palette("deep", n_methods)
-    ax = sns.pointplot('Y', 'Estimate', hue='Method', palette=palette,
-                       data=ATEs, dodge=True, join=False, ci=None)
+    ax = sns.pointplot(data=ATEs, x = 'Y', y = 'Estimate', hue='Method', palette=palette,
+                       dodge=True, join=False, errorbar=None)
 
 
     # Find the x,y coordinates for each point
