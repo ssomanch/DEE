@@ -161,7 +161,7 @@ def get_vmax_min(y_name,estimator,k_prime,t_partition):
     for RD_type in ['population','space_and_population']:
         OUTDIR = f"output/rural_roads/{y_name}/{RD_type}/{estimator}__k_{k_prime}__t_{t_partition}__isotropic/"
         merged = pd.read_csv(f'{OUTDIR}/for_side_by_side_maps.csv')
-        vmin,vmax= min(vmin,merged.posterior_MLL.min()),max(vmax,merged.posterior_MLL.max())
+        vmin,vmax= min(vmin,merged['posterior_min dist'].min()),max(vmax,merged['posterior_min dist'].max())
     return vmin,vmax
     
 def add_one_map(y_name,RD_type,axgr,i,vmin,vmax,table,
@@ -184,7 +184,7 @@ def add_one_map(y_name,RD_type,axgr,i,vmin,vmax,table,
 
     sc = axgr[i].scatter(merged.longitude_raw,
                          merged.latitude_raw,
-                         c=merged.posterior_MLL.values,
+                         c=merged['posterior_min dist'].values,
                          transform=ccrs.PlateCarree(),
                          vmin=vmin,vmax=vmax,cmap='coolwarm_r',
                          s=0.5, marker='o')
@@ -215,7 +215,6 @@ plt.savefig('output/rural_roads/figures/ATE_by_outcomes.png')
 #######################################################
 
 # Load indian state boundaries
-#fname = 'data/rural_roads/India_States_ADM1_GADM-shp/3e563fd0-8ea1-43eb-8db7-3cf3e23174512020330-1-layr7d.ivha.shp'
 fname = 'data/rural_roads/India_States_AMD1_GADM-shp/India_State_Boundary.shp'
 shape_feature = ShapelyFeature(Reader(fname).geometries(),
                                 ccrs.PlateCarree(), edgecolor='black')

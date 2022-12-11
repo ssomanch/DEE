@@ -258,7 +258,18 @@ for t in target_cols:
     gp.fit(train_x,train_y,CATE_est_var)
     models[t] = gp
     lml = gp.get_lml(train_x,train_y,CATE_est_var)
+    min_d_weighted_PLP = 0
+    random_d_weighted_PLP = 0
+    LOO_PLP = 0
+    for ix in range(train_x.shape[0]):
+        min_d_weighted_PLP += get_weighted_plp(gp,train_x,train_y,CATE_est_var,ix,min_d,'min dist')
+        LOO_PLP += get_loo_plp(gp,train_x,train_y,CATE_est_var,ix)
+        random_d_weighted_PLP += random_dist_PLP_and_candidate_weights(gp,train_x,train_y,CATE_est_var,
+                                                                       ix,min_d)
     results[t] = {
+        'min dist': min_d_weighted_PLP,
+        'random dist': random_d_weighted_PLP,
+        'LOO': LOO_PLP,
         'MLL': lml
     }
     post_df = gp.posterior(test_x)
@@ -270,7 +281,7 @@ gp_test_posterior_means['bias'] = cf_test_CATE_est - gp_test_posterior_means['bi
 # Get the weighted estimators           #
 #########################################
 
-strategies = ['MLL']
+strategies = ['min dist']
 for strategy in strategies:
     
     print(f'Computing {strategy} weighting MSE...')
@@ -317,7 +328,6 @@ with torch.no_grad():
 
 print('Making maps...')
 # Load indian state boundaries
-#fname = 'data/rural_roads/India_States_ADM1_GADM-shp/3e563fd0-8ea1-43eb-8db7-3cf3e23174512020330-1-layr7d.ivha.shp'
 fname = 'data/rural_roads/India_States_AMD1_GADM-shp/India_State_Boundary.shp'
 shape_feature = ShapelyFeature(Reader(fname).geometries(),
                                 ccrs.PlateCarree(), edgecolor='black')
@@ -384,7 +394,7 @@ axgr[0].add_feature(shape_feature,facecolor='none')
 
 sc = axgr[0].scatter(merged.longitude_raw,
                      merged.latitude_raw,
-                     c=merged.posterior_MLL.values,
+                     c=merged['posterior_min dist'].values,
                      transform=ccrs.PlateCarree(), s=0.5, marker='o')
 
 axgr[0].scatter(VKNN_ests.longitude_raw,
