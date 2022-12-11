@@ -111,7 +111,7 @@ def get_table_and_figure(estimator,k,t):
     ax.axhline(0,linestyle='--',color='grey')
     ax.legend(loc='upper left',fontsize=12)
     ax.set_xlabel('Outcome index')
-    ax.set_ylabel('Estimate and 95% CI')
+    ax.set_ylabel(r'Estimate ($E[\hat{\tau}(x)]$) and 95% CI')
     ax.set_title(r'Comparing $E[\hat{\tau}(x)]$ across three methods')
     
     return ATEs, ATE_pivot_str, fig
