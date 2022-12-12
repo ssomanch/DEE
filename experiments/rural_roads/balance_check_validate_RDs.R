@@ -28,7 +28,10 @@ variable_map = c(
   bpl_inc_250plus = 'HH income > INR 250 (share)'
 )
 
-M_prime = 1500
+# M_prime is chosen based on randomization testing by running 
+# randomization_testing_LORD3.R and  compute_M_prime_from_randomization.R
+# Note that these files are not run in the regular flow of the application.
+M_prime = 2784
 alpha = 0.05
 nvec_col_names = c('longitude_nvec','latitude_nvec','total_pop_nvec')
 

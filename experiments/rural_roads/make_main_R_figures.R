@@ -3,7 +3,10 @@ library(data.table)
 library(lsa)
 
 target_v = c(0,0,1)
-M_prime = 1500
+# M_prime is chosen based on randomization testing by running 
+# randomization_testing_LORD3.R and  compute_M_prime_from_randomization.R
+# Note that these files are not run in the regular flow of the application.
+M_prime = 2784
 cos_pop_thresh = 0.75
 
 est_set = fread('output/rural_roads/roads.csv')
@@ -32,7 +35,7 @@ abs_cos_sim = abs(apply(nvecs,1,function(r) cosine(r,target_v)))
 pop_RDD = abs_cos_sim > cos_pop_thresh
 bound[['RD type']] = ifelse(pop_RDD,'Population','Spatial')
 
-hline = bound[1500,'LLR']
+hline = bound[M_prime,'LLR']
 
 p <- ggplot(bound[bound$LLR>0,],aes(x=total_pop,y=LLR,color=`RD type`)) + geom_point(size=1,alpha=0.5) + 
   xlab('Village population') + ylab('LLR') + geom_hline(yintercept=hline,linetype=2,color='red') + 

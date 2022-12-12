@@ -201,7 +201,7 @@ class TwoStageGPJustRBFWrapper(object):
         return PLP.item()
     
 
-def get_padded_posterior(models,target,train_x,test_x,random_test_sample,jitter=1e-4):
+def get_padded_posterior(models,target,train_x,test_x,random_test_sample,jitter=5e-4):
     # Use Rasmussmen eq. 2.42 to compute covariance of g*
     post = models[target].model.TE_model(test_x[random_test_sample,:])
     H = torch.ones(size=(1,train_x.shape[0]))

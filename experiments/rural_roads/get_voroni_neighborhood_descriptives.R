@@ -18,7 +18,10 @@ library(lsa)
 
 COS_POP_THRESH = 0.75
 alpha = 0.05
-M_prime = 1500
+# M_prime is chosen based on randomization testing by running 
+# randomization_testing_LORD3.R and  compute_M_prime_from_randomization.R
+# Note that these files are not run in the regular flow of the application.
+M_prime = 2784
 nvec_col_names = c('longitude_nvec','latitude_nvec','total_pop_nvec')
 control_cols = c('primary_school','med_center','elect',
                  'tdist','irr_share','ln_land','pc01_lit_share',

@@ -23,7 +23,10 @@ sns.set_context('paper',font_scale=2)
 estimator = 'nonparametric_estimator'
 k = 400
 t = 40
-top_M=1500
+# top_M is chosen based on randomization testing by running 
+# randomization_testing_LORD3.R and  compute_M_prime_from_randomization.R
+# Note that these files are not run in the regular flow of the application.
+top_M=2784
 
 #######################################################
 # Utilities                                           #
