@@ -107,7 +107,7 @@ def get_table_and_figure(estimator,k,t):
             y_coords.append(y)
 
 
-    errors = ATEs.sort_values(['Method','Y'])['Std. Error']*1.96
+    errors = ATEs.sort_values(['Method','Y'])['Std. Error']
     ax.errorbar(x_coords, y_coords, yerr=errors*1.96,
                 ecolor=np.repeat(palette,repeats=ATEs['Y'].nunique(),axis=0), fmt=' ', zorder=-1)
 
