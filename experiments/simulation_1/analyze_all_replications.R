@@ -237,12 +237,6 @@ get_original_results = function(filtered, metric='MSE'){
 					Kallus_means=Kallus_means))
 	}
 	else{
-		# TODO: Compute the mean CP using causal forest directly
-		
-		# TODO: Compute the mean CP using Cattaneo
-		
-		# TODO: Compute the mean CP using Kallus
-		
 		seeds_configs_and_paths = seeds_configs_and_paths %>%
 			filter(method %in% c('CATE','Bias')) %>%
 			select(c(ix_cols,'CP','method')) %>%
