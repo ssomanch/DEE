@@ -65,6 +65,13 @@ Rscript experiments/rural_roads/make_main_R_figures.R
 python experiments/rural_roads/stack_neighborhood_descriptives.py
 ```
 
+#### Acknowledgements
+
+1. We ackowledge William Herlands for providing the code for LORD3 method [2] used extensively in our research. 
+
+
 #### References
 
 [1] Asher, Sam, and Paul Novosad. “Rural Roads and Local Economic Development.” American Economic Review 110, no. 3 (March 2020): 797–823. https://doi.org/10.1257/aer.20180268.
+
+[2] Herlands, William, Edward McFowland III, Andrew Gordon Wilson, and Daniel B. Neill. "Automated local regression discontinuity design discovery." In Proceedings of the 24th ACM SIGKDD international conference on knowledge discovery & data mining, pp. 1512-1520. 2018.
