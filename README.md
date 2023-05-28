@@ -4,7 +4,7 @@
 
 This repo contains code for the following paper and replicating the experiments in the DEE paper. We will update the repo soon such that the method is available as a standalone package. 
 
-B. Jakubowski, S. Somanchi, E. McFowland III, and D. B. Neill. Exploiting Discovered Regression Discontinuities to Debias Conditioned-on-Observable Estimators. <em>Journal of Machine Learning Research (JMLR)</em>, Forthcoming, 2023.
+B. Jakubowski, S. Somanchi, E. McFowland III, and D. B. Neill. Exploiting Discovered Regression Discontinuities to Debias Conditioned-on-Observable Estimators. <em>Journal of Machine Learning Research (JMLR)</em>, 24(133), pp.1-57, 2023.
 
 ## Instructions
 
